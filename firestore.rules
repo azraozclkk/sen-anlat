@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Üniversite e-postası (.edu.tr)
+    function universiteEpostasi() {
+      return request.auth != null
+        && request.auth.token.email.lower().matches('.*[.]edu[.]tr');
+    }
+    // ...ve doğrulanmış
+    function dogrulanmisOgrenci() {
+      return universiteEpostasi() && request.auth.token.email_verified == true;
+    }
+    function ben(uid) { return request.auth != null && request.auth.uid == uid; }
+
+    // Kullanıcılar: kayıt sırasında (doğrulamadan önce) kişi kendi kaydını oluşturabilir;
+    // okuma ve güncelleme için e-postanın doğrulanmış olması gerekir
+    match /kullanicilar/{uid} {
+      allow create: if ben(uid) && universiteEpostasi();
+      allow read: if dogrulanmisOgrenci();
+      allow update: if ben(uid) && dogrulanmisOgrenci();
+    }
+
+    // Randevular ve aramalar (sesli görüşme eşleşmesi)
+    match /randevular/{id} {
+      allow read, write: if dogrulanmisOgrenci();
+    }
+    match /aramalar/{yol=**} {
+      allow read, write: if dogrulanmisOgrenci();
+    }
+
+    // Değerlendirmeler: sadece o görüşmedeki öğrenci, o görüşmenin anlatıcısını,
+    // bir kez ve 1-5 arası puanla değerlendirebilir. Sonradan değiştirilemez.
+    match /degerlendirmeler/{aramaId} {
+      allow read: if dogrulanmisOgrenci();
+      allow create: if dogrulanmisOgrenci()
+        && request.resource.data.ogrenciUid == request.auth.uid
+        && get(/databases/$(database)/documents/aramalar/$(aramaId)).data.ogrenciUid == request.auth.uid
+        && get(/databases/$(database)/documents/aramalar/$(aramaId)).data.gonulluUid == request.resource.data.gonulluUid
+        && request.resource.data.ortalama is number
+        && request.resource.data.ortalama >= 1 && request.resource.data.ortalama <= 5;
+    }
+  }
+}

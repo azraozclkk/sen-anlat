@@ -1,0 +1,2590 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sen Anlat</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="ikon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sen Anlat">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Gündüz teması: krem zemin, lacivert bant, koyu mavi vurgu.
+     Tüm metin kontrastları en az 7:1 (WCAG AAA), renkler açıklık farkıyla da ayrışır. */
+  :root {
+    --zemin: #F7F5EF; --yazi: #14213D; --ikinci-yazi: #3D4A63; --kenar: #14213D;
+    --ana: #1D4ED8; --ana-acik: #DBE4FF; --bant: #14213D; --kart: #FFFFFF;
+    --vurgu: #C2410C; --kirmizi: #B91C1C; --uyari: #FFF3D6; --uyari-kenar: #B45309; --odak: #C2410C;
+    --baslik-font: 'Lexend', 'Atkinson Hyperlegible', system-ui, sans-serif;
+    --govde-font: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0 auto; padding: 0; max-width: 560px; min-height: 100vh;
+         font-family: var(--govde-font); font-size: 20px; line-height: 1.45;
+         background: var(--zemin); color: var(--yazi); }
+  main { padding: 0 18px 32px; }
+  h1, h2, h3, legend, summary { font-family: var(--baslik-font); }
+  h1 { font-size: 26px; margin: 0; letter-spacing: -0.2px; }
+  h2 { font-size: 28px; line-height: 1.2; margin: 24px 0 12px; letter-spacing: -0.2px; }
+  h3 { font-size: 20px; margin: 28px 0 8px; font-weight: 600; }
+  p { margin: 8px 0; }
+  label { display: block; margin-top: 18px; font-weight: 700; }
+
+  /* Form alanları */
+  input, select, textarea { width: 100%; padding: 14px 16px; font-size: 20px; font-family: var(--govde-font); margin-top: 6px;
+                            border: 2px solid var(--ikinci-yazi); border-radius: 14px; background: var(--kart); color: var(--yazi); }
+  input::placeholder, textarea::placeholder { color: #5B6680; }
+  textarea { min-height: 96px; font-size: 18px; }
+  input[type="file"] { padding: 12px; }
+  :focus-visible { outline: 4px solid var(--odak); outline-offset: 3px; }
+
+  /* Butonlar */
+  button { width: 100%; min-height: 56px; padding: 14px 20px; margin-top: 14px; font-size: 20px; font-weight: 700;
+           font-family: var(--baslik-font); border: 2px solid var(--ana); border-radius: 18px;
+           background: var(--ana); color: #FFFFFF; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button.ikincil { background: var(--kart); color: var(--yazi); border-color: var(--kenar); }
+  button.buyuk { min-height: 96px; font-size: 26px; border-radius: 24px; box-shadow: 0 6px 0 var(--bant); margin-bottom: 6px; }
+  button.buyuk:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--bant); }
+  button.tehlike { background: var(--kirmizi); border-color: var(--kirmizi); min-height: 88px; font-size: 26px; border-radius: 24px; }
+
+  /* "Hemen yardım iste": ikonlu büyük buton */
+  button.ikonlu { display: flex; align-items: center; gap: 16px; text-align: left; padding: 18px 22px; }
+  .ikonKutu { width: 56px; height: 56px; border-radius: 18px; background: #FFFFFF; flex: none;
+              display: flex; align-items: center; justify-content: center; }
+  .butonMetin { display: flex; flex-direction: column; gap: 4px; }
+  .butonAlt { font-family: var(--govde-font); font-size: 17px; color: var(--ana-acik); }
+
+  .rozet { background: var(--vurgu); color: #FFFFFF; font-family: var(--govde-font); font-size: 15px; font-weight: 700;
+           padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+
+  /* Üst bant */
+  header { background: var(--bant); color: #FFFFFF; padding: 18px 18px 24px; border-radius: 0 0 32px 32px;
+           display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  header .baslikGrup { flex: 1 1 200px; }
+  header .baslikGrup p { margin: 2px 0 0; font-size: 16px; color: #D6DCE8; }
+  header .ustButonlar { display: flex; gap: 8px; }
+  header .ustButonlar button { width: 52px; height: 52px; min-height: 0; padding: 0; margin: 0; border-radius: 50%;
+                               background: transparent; color: #FFFFFF; border: 2px solid #FFFFFF;
+                               display: flex; align-items: center; justify-content: center; }
+  header :focus-visible { outline-color: #FFB020; }
+  #gorunumPanel { flex-basis: 100%; }
+  #gorunumPanel label.anahtar { margin: 10px 0 0; border-color: #FFFFFF; color: #FFFFFF; background: rgba(255,255,255,.06); }
+
+  /* Ana ekranda karşılama, bandın devamı gibi görünür */
+  body.anaEkranda header { border-radius: 0; padding-bottom: 8px; }
+  /* Engelli öğrencinin ana ekranında uygulama adı ve alt başlık görünmez (h1 ekran okuyucu için kalır) */
+  body.anaEkranda header .baslikGrup { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  body.anaEkranda header { justify-content: flex-end; }
+  .karsilama { background: var(--bant); color: #FFFFFF; margin: 0 -18px; padding: 4px 18px 64px; border-radius: 0 0 32px 32px; }
+  .karsilama h2 { margin: 0; font-size: 30px; }
+  .gorunmez { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .karsilama p { color: #D6DCE8; font-size: 18px; margin: 6px 0 0; }
+  .karsilama .uyari { color: var(--yazi); margin-top: 14px; }
+  .karsilama + #ogrenciUst #yardimBtn, .karsilama ~ #ogrenciUst > #yardimBtn { margin-top: -48px; }
+  .karsilama:has(+ #ogrenciUst.gizli) { padding-bottom: 24px; }
+  .ikiliIzgara { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+  .ikiliIzgara button { margin: 0; min-height: 92px; display: flex; flex-direction: column; align-items: center;
+                        justify-content: center; gap: 6px; background: transparent; color: var(--yazi); border-color: var(--kenar);
+                        font-size: 18px; border-radius: 20px; }
+
+  /* Kartlar ve listeler */
+  ul { list-style: none; padding: 0; margin: 0; }
+  li.kart { background: var(--kart); border: 2px solid var(--kenar); border-radius: 22px; padding: 16px 18px; margin-top: 12px;
+            font-weight: 700; font-size: 19px; }
+  li.kart p { font-weight: 400; }
+  li.kart button { min-height: 52px; font-size: 18px; border-radius: 14px; }
+  li.kart button.ikincil { color: var(--ana); border-color: var(--ana); }
+  li.kart > ul, li.kart audio { font-weight: 400; }
+  .bos { color: var(--ikinci-yazi); margin-top: 8px; }
+  .uyari { background: var(--uyari); border: 2px solid var(--uyari-kenar); padding: 12px 16px; border-radius: 16px; font-weight: 700; }
+  li.uyari { margin-top: 12px; }
+
+  /* Seçim kutuları ve anahtarlar */
+  fieldset { border: 2px solid var(--kenar); border-radius: 18px; margin-top: 18px; padding: 8px 16px 12px; background: var(--kart); }
+  legend { font-weight: 600; padding: 0 6px; font-size: 18px; }
+  fieldset label, label.anahtar, label.secim { display: flex; align-items: center; gap: 12px; margin: 10px 0; font-weight: 700; }
+  fieldset input, label.anahtar input, label.secim input { width: 28px; height: 28px; margin: 0; flex: none; accent-color: var(--ana); }
+  label.anahtar { margin-top: 18px; padding: 14px 16px; border: 2px solid var(--ana); border-radius: 18px; background: var(--kart); }
+  details { border: 2px solid var(--kenar); border-radius: 18px; margin-top: 14px; padding: 4px 16px; background: var(--kart); }
+  summary { padding: 12px 0; font-weight: 600; cursor: pointer; }
+  .saatIzgara { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 12px; padding-bottom: 10px; }
+  .saatIzgara label { font-weight: 400; margin: 6px 0; }
+  ul.slotlar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  ul.slotlar button { margin-top: 0; padding: 14px 4px; font-size: 20px; }
+
+  /* Görüşme ekranı */
+  .sure { font-family: var(--baslik-font); font-size: 52px; font-weight: 700; text-align: center; margin: 8px 0;
+          font-variant-numeric: tabular-nums; background: var(--kart); border: 2px solid var(--kenar); border-radius: 24px; padding: 12px; }
+  #gorusmeBilgi { color: var(--ikinci-yazi); min-height: 1.2em; }
+
+  /* Belgeler, kayıtlar, yıldızlar */
+  #belgeSayfalar canvas, #belgeSayfalar img, #belgeSayfalar iframe {
+    display: block; width: 100%; margin-top: 8px; border: 2px solid var(--kenar); border-radius: 12px; background: #fff; }
+  #belgeSayfalar iframe { height: 70vh; }
+  #belgeSayfalar h4 { margin: 20px 0 4px; font-family: var(--baslik-font); }
+  a, a.baglanti { color: var(--ana); font-weight: 700; }
+  a.baglanti { display: block; margin-top: 12px; }
+  audio.kayitOynatici { width: 100%; margin-top: 10px; }
+  fieldset.yildizlar { padding: 8px 16px 12px; }
+  .yildizlar label.yildiz { display: inline-block; margin: 0 2px; font-weight: 400; cursor: pointer; }
+  .yildiz input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .yildiz span { font-size: 46px; line-height: 1; color: #9AA3B5; }
+  .yildiz.dolu span { color: var(--vurgu); }
+  .yildiz input:focus-visible + span { outline: 4px solid var(--odak); outline-offset: 2px; border-radius: 8px; }
+  #mesaj { margin-top: 18px; font-weight: 700; min-height: 1.5em; }
+  .rehber h3 { margin-top: 22px; }
+  .rehber li { margin: 6px 0 6px 22px; list-style: disc; }
+
+  /* Büyük yazı */
+  html.buyukYazi body { font-size: 25px; }
+  html.buyukYazi h1 { font-size: 32px; }
+  html.buyukYazi h2, html.buyukYazi .karsilama h2 { font-size: 34px; }
+  html.buyukYazi h3 { font-size: 26px; }
+  html.buyukYazi input, html.buyukYazi select, html.buyukYazi textarea { font-size: 24px; }
+  html.buyukYazi button { font-size: 25px; }
+  html.buyukYazi button.buyuk { font-size: 32px; }
+  html.buyukYazi .butonAlt { font-size: 21px; }
+
+  /* Yüksek kontrast: siyah zemin, sarı vurgular */
+  html.yuksekKontrast { --zemin: #000; --yazi: #FFF; --ikinci-yazi: #FFF; --kenar: #FFF; --ana: #FFE14D; --ana-acik: #000;
+                        --bant: #000; --kart: #000; --vurgu: #FFE14D; --kirmizi: #FF6B6B; --uyari: #000; --uyari-kenar: #FFE14D; --odak: #FFE14D; }
+  html.yuksekKontrast button { color: #000; border-width: 3px; }
+  html.yuksekKontrast button.ikincil, html.yuksekKontrast .ikiliIzgara button { color: #FFE14D; background: #000; border-color: #FFE14D; }
+  html.yuksekKontrast button.buyuk { box-shadow: none; }
+  html.yuksekKontrast .ikonKutu { background: #000; }
+  html.yuksekKontrast .ikonKutu svg { stroke: #FFE14D; }
+  html.yuksekKontrast .rozet { color: #000; }
+  html.yuksekKontrast header, html.yuksekKontrast .karsilama { border-bottom: 3px solid #FFE14D; }
+  html.yuksekKontrast header .baslikGrup p, html.yuksekKontrast .karsilama p { color: #FFF; }
+  html.yuksekKontrast li.kart button.ikincil { color: #FFE14D; border-color: #FFE14D; }
+  html.yuksekKontrast a { text-decoration: underline; }
+  html.yuksekKontrast .uyari { color: #FFF; }
+  html.yuksekKontrast .yildiz span { color: #777; }
+  html.yuksekKontrast .yildiz.dolu span { color: #FFE14D; }
+  html.yuksekKontrast header .ustButonlar button { color: #FFE14D; background: #000; border-color: #FFE14D; }
+  html.yuksekKontrast .karsilama { border-radius: 0; border-bottom: none; }
+  html.yuksekKontrast body.anaEkranda header { border-bottom: none; }
+  /* Ekran değişiminde odak başlığa programla gider: ekran okuyucu okur, görenler için çerçeve çizilmez */
+  [tabindex="-1"]:focus { outline: none; }
+  ul.oneriler { margin-top: 6px; border: 2px solid var(--kenar); border-radius: 16px; background: var(--kart); padding: 6px; }
+  ul.oneriler button { margin: 4px 0; min-height: 48px; text-align: left; font-size: 18px; border-radius: 12px;
+                       background: var(--kart); color: var(--yazi); border: 2px solid transparent; font-family: var(--govde-font); }
+  ul.oneriler button:hover, ul.oneriler button:focus-visible { border-color: var(--ana); background: var(--ana-acik); }
+  ul.oneriler mark { background: none; color: var(--ana); font-weight: 700; }
+  html.yuksekKontrast ul.oneriler button { color: #FFF; background: #000; }
+  html.yuksekKontrast ul.oneriler mark { color: #FFE14D; }
+  details.hukuki { margin-top: 10px; }
+  .hukukiMetin { max-height: 320px; overflow-y: auto; font-size: 17px; line-height: 1.5; padding-bottom: 8px; }
+  .hukukiMetin p { margin: 8px 0; }
+  ul.madde li { list-style: disc; margin: 6px 0 6px 22px; }
+  .onayKutusu { margin-top: 18px; padding: 16px; border: 2px solid var(--kenar); border-radius: 18px; background: var(--kart); }
+  .onayKutusu h3 { margin-top: 0; }
+  .onayKutusu label.secim { align-items: flex-start; font-size: 18px; }
+  .onayKutusu label.secim input { margin-top: 2px; }
+  .aramaSatiri { display: flex; gap: 8px; align-items: stretch; }
+  .aramaSatiri input { flex: 1; min-width: 0; }
+  .mikrofonBtn { width: auto; margin-top: 6px; padding: 0 16px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .mikrofonBtn[aria-pressed="true"] { background: var(--vurgu); border-color: var(--vurgu); }
+  ul.seciliDersler li.kart { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; padding: 10px 12px 10px 18px; }
+  ul.seciliDersler li.kart button { width: auto; margin: 0; padding: 8px 16px; min-height: 48px; }
+  fieldset.hizSecimi { display: flex; gap: 10px; padding: 8px 12px 12px; }
+  fieldset.hizSecimi legend { font-size: 18px; }
+  fieldset.hizSecimi label { flex: 1; margin: 0; justify-content: center; min-height: 56px; border: 2px solid var(--kenar);
+                             border-radius: 14px; font-family: var(--baslik-font); font-size: 20px; cursor: pointer; }
+  fieldset.hizSecimi label:has(input:checked) { background: var(--ana); border-color: var(--ana); color: #FFF; }
+  fieldset.hizSecimi input { width: 22px; height: 22px; }
+  html.yuksekKontrast fieldset.hizSecimi label:has(input:checked) { color: #000; }
+  .sayfaAraligi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .gizli { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="baslikGrup">
+    <h1>Sen Anlat</h1>
+    <p>Üniversite öğrencileri akran destek ağı</p>
+  </div>
+  <div class="ustButonlar">
+    <button id="rehberBtn" aria-label="Nasıl kullanılır?">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    </button>
+    <button id="gorunumBtn" aria-label="Görünüm ayarları" aria-expanded="false" aria-controls="gorunumPanel">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.3 17.7-1.4 1.4"/><path d="m19.1 4.9-1.4 1.4"/></svg>
+    </button>
+  </div>
+  <div id="gorunumPanel" class="gizli">
+    <label class="anahtar"><input type="checkbox" role="switch" id="buyukYaziAnahtar"> Büyük yazı</label>
+    <label class="anahtar"><input type="checkbox" role="switch" id="kontrastAnahtar"> Yüksek kontrast (siyah zemin, sarı yazı)</label>
+  </div>
+</header>
+
+<main>
+  <!-- KAYIT -->
+  <section id="kayitBolumu" class="gizli" aria-labelledby="kayitBaslik">
+    <h2 id="kayitBaslik">Kayıt ol</h2>
+    <form id="kayitFormu">
+      <fieldset>
+        <legend>Rolünüz</legend>
+        <label><input type="radio" name="rol" value="ogrenci" required> Destek almak istiyorum</label>
+        <label><input type="radio" name="rol" value="gonullu"> Gönüllü anlatıcıyım</label>
+      </fieldset>
+
+      <label for="adSoyad">Ad soyad</label>
+      <input id="adSoyad" required autocomplete="name">
+
+      <div id="kayitHesapAlanlari">
+        <label for="kayitEposta">Üniversite e-postası (.edu.tr ile biten)</label>
+        <input id="kayitEposta" type="email" required autocomplete="email" placeholder="ornek@ogr.sakarya.edu.tr">
+
+        <label for="kayitSifre">Şifre (en az 6 karakter)</label>
+        <input id="kayitSifre" type="password" minlength="6" required autocomplete="new-password">
+      </div>
+
+      <label class="anahtar gizli" id="kayitOkuyucuKutu"><input type="checkbox" id="kayitOkuyucu"> Metin okuma gönüllüsüyüm: PDF ve not okuyabilirim</label>
+
+      <div class="onayKutusu" id="kayitOnayKutusu">
+        <h3>Kişisel verilerin korunması</h3>
+        <div class="hukukiMetinler"></div>
+        <label class="secim"><input type="checkbox" id="kayitKvkk" required> Aydınlatma metnini ve kullanım koşullarını okudum, kabul ediyorum.</label>
+        <label class="secim"><input type="checkbox" id="kayitRiza" required> Özel nitelikli verilerin işlenmesi ve yurt dışına aktarım için açık rıza veriyorum.</label>
+        <label class="secim gizli" id="kayitSesIzniKutu"><input type="checkbox" id="kayitSesIzni"> İsteğe bağlı: Anlattığım derslerin kaydedilmesine izin veriyorum. Bunu derse katılacak kişi görür; sonra "Derslerim" ekranından değiştirebilirim.</label>
+      </div>
+
+      <button type="submit" id="kayitGonderBtn">Kayıt ol</button>
+    </form>
+    <button class="ikincil" id="giriseGec">Zaten hesabım var, giriş yap</button>
+  </section>
+
+  <!-- GİRİŞ -->
+  <section id="girisBolumu" class="gizli" aria-labelledby="girisBaslik">
+    <h2 id="girisBaslik">Giriş yap</h2>
+    <form id="girisFormu">
+      <label for="girisEposta">Üniversite e-postası</label>
+      <input id="girisEposta" type="email" required autocomplete="email">
+      <label for="girisSifre">Şifre</label>
+      <input id="girisSifre" type="password" required autocomplete="current-password">
+      <button type="submit">Giriş yap</button>
+    </form>
+    <button class="ikincil" id="sifremiUnuttumBtn">Şifremi unuttum</button>
+    <button class="ikincil" id="kayitaGec">Hesabım yok, kayıt ol</button>
+  </section>
+
+  <!-- E-POSTA DOĞRULAMA -->
+  <section id="dogrulamaEkrani" class="gizli" aria-labelledby="dogrulamaBaslik">
+    <h2 id="dogrulamaBaslik">E-postanı doğrula</h2>
+    <p id="dogrulamaMetin"></p>
+    <p>Gelen kutunda göremezsen <strong>gereksiz (spam)</strong> klasörüne de bak.</p>
+    <button id="dogruladimBtn">Doğruladım, devam et</button>
+    <button class="ikincil" id="tekrarGonderBtn">Doğrulama e-postasını tekrar gönder</button>
+    <button class="ikincil" id="dogrulamaCikisBtn">Farklı bir hesapla gir</button>
+  </section>
+
+  <!-- HUKUKİ ONAY (metin güncellendiğinde ya da eski hesaplarda) -->
+  <section id="onayEkrani" class="gizli" aria-labelledby="onayBaslik">
+    <h2 id="onayBaslik">Kişisel verilerin korunması</h2>
+    <p>Devam etmeden önce lütfen aşağıdaki metinleri oku ve onayla.</p>
+    <div class="onayKutusu">
+      <div class="hukukiMetinler"></div>
+      <label class="secim"><input type="checkbox" id="onayKvkk"> Aydınlatma metnini ve kullanım koşullarını okudum, kabul ediyorum.</label>
+      <label class="secim"><input type="checkbox" id="onayRiza"> Özel nitelikli verilerin işlenmesi ve yurt dışına aktarım için açık rıza veriyorum.</label>
+      <label class="secim gizli" id="onaySesIzniKutu"><input type="checkbox" id="onaySesIzni"> İsteğe bağlı: Anlattığım derslerin kaydedilmesine izin veriyorum. Bunu derse katılacak kişi görür.</label>
+    </div>
+    <button id="onayKabulBtn">Onaylıyorum, devam et</button>
+    <button class="ikincil" id="onayCikisBtn">Onaylamıyorum, çıkış yap</button>
+  </section>
+
+  <!-- ANA EKRAN -->
+  <section id="anaEkran" class="gizli" aria-labelledby="anaBaslik">
+    <div class="karsilama">
+      <h2 id="anaBaslik">Hoş geldin</h2>
+      <p id="puanBilgi" class="gizli"></p>
+      <p id="uyari" class="uyari gizli"></p>
+      <p id="hatirlatma" class="uyari gizli" role="alert"></p>
+    </div>
+
+    <div id="ogrenciUst" class="gizli">
+      <button id="yardimBtn" class="buyuk ikonlu">
+        <span class="ikonKutu" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></span>
+        <span class="butonMetin"><span>Hemen yardım iste</span><span class="butonAlt">Ders anlatımı · metin okuma</span></span>
+      </button>
+      <button id="devamBtn" class="ikincil gizli">Çalışmaya devam et</button>
+    </div>
+
+    <h3 id="randevuBaslikAna">Yaklaşan randevularım</h3>
+    <ul id="randevuListe"></ul>
+
+    <div id="gonulluPanel" class="gizli">
+      <label class="anahtar"><input type="checkbox" role="switch" id="okuyucuAnahtar"> Metin okuyucuyum: PDF okuma isteği alabilirim</label>
+      <ul id="gelenListe" aria-label="Gelen aramalar"></ul>
+      <label class="anahtar"><input type="checkbox" role="switch" id="musaitAnahtar"> Şu an müsaitim, randevusuz anlık arama da alabilirim</label>
+    </div>
+
+    <div class="ikiliIzgara">
+      <button id="gecmisBtn">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 3"/></svg>
+        Geçmiş derslerim
+      </button>
+      <button id="profilBtn">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        <span id="profilBtnMetin">Derslerim</span>
+      </button>
+    </div>
+    <button class="ikincil" id="cikisBtn">Çıkış yap</button>
+  </section>
+
+  <!-- YARDIM SEÇENEKLERİ (öğrenci) -->
+  <section id="yardimEkrani" class="gizli" aria-labelledby="yardimBaslik">
+    <h2 id="yardimBaslik">Ne tür yardım istiyorsun?</h2>
+
+    <h3>Ders anlatımı</h3>
+    <button id="yeniRandevuBtn" class="buyuk">Ders için randevu al</button>
+
+    <h3>Metin okuma</h3>
+    <button id="okumaAraBtn" class="buyuk">Şimdi bir okuyucu ara</button>
+    <button id="okumaRandevuBtn" class="ikincil">Okuma için randevu al</button>
+    <button id="aiOkumaBtn" class="ikincil">Yapay zekâya PDF okut</button>
+
+    <button class="ikincil" id="yardimGeri">Geri</button>
+  </section>
+
+  <!-- NASIL KULLANILIR -->
+  <section id="rehberEkrani" class="gizli rehber" aria-labelledby="rehberBaslik">
+    <h2 id="rehberBaslik">Nasıl kullanılır?</h2>
+    <button id="rehberDinleBtn" class="ikincil">Rehberi sesli dinle</button>
+    <div id="rehberMetni">
+      <p>Sen Anlat, üniversite öğrencilerini birbirine bağlayan sesli bir destek ağıdır. Görme engelli öğrenciler, o dersi bilen gönüllü öğrencilerden ders anlatımı ya da metin okuma desteği alır.</p>
+      <h3>Destek alan öğrenciysen</h3>
+      <ul>
+        <li>Ana ekrandaki "Hemen yardım iste" butonuna bas.</li>
+        <li>Ders anlatımı için "Ders için randevu al" de, dersini, gönüllüyü ve uygun saati seç. Randevu saatinde "Görüşmeyi başlat" butonuna bas; beklerken düzenli aralıklarla çalma sesi duyarsın.</li>
+        <li>Derslerini eklerken ders adını yazabilir ya da "Sesle söyle" butonuna basıp söyleyebilirsin.</li>
+        <li>Notlarını ya da PDF'ini okutmak için "Şimdi bir okuyucu ara" de. Görüşme sırasında "Belgeyi gönüllüye gönder" ile dosyanı paylaş.</li>
+        <li>Sözel derslerde "Yapay zekâya PDF okut" ile metni hemen dinleyebilirsin. Formül içeren derslerde seni gönüllüye yönlendiririz.</li>
+        <li>Daha önce çalıştığın bir gönüllüyle yeniden randevu almak için ana ekrandaki "Çalışmaya devam et" butonunu kullan.</li>
+      </ul>
+      <h3>Gönüllüysen</h3>
+      <ul>
+        <li>"Derslerimi ve müsait saatlerimi düzenle" bölümünden anlatabileceğin dersleri ve boş saatlerini işaretle.</li>
+        <li>Randevusuz arama almak için "Şu an müsaitim" anahtarını aç. Arama gelince zil çalar ve telefon titrer.</li>
+        <li>Bölüm fark etmeksizin metin okumak istersen "Metin okuyucuyum" anahtarını aç.</li>
+      </ul>
+      <h3>Görüşme sırasında</h3>
+      <ul>
+        <li>Bağlantı kurulunca iki kısa yüksek ses, görüşme bitince alçalan bir ses duyarsın.</li>
+        <li>Görüşme sırasında ekran okuyucu yalnızca önemli bilgileri okur; karşındakinin sesi bölünmez.</li>
+        <li>Dersi bitirmek için "Dersi bitir" butonuna bas, sonra anlatıcıyı 5 yıldız üzerinden değerlendir.</li>
+      </ul>
+      <h3>Görünüm</h3>
+      <ul>
+        <li>Sayfanın üstündeki "Görünüm" butonundan büyük yazıyı ve yüksek kontrastı açabilirsin.</li>
+      </ul>
+    </div>
+    <button class="ikincil" id="rehberGeri">Geri</button>
+  </section>
+
+  <!-- YAPAY ZEKÂ İLE METİN OKUMA -->
+  <section id="aiOkumaEkrani" class="gizli" aria-labelledby="aiOkumaBaslik">
+    <h2 id="aiOkumaBaslik">Yapay zekâ ile metin okuma</h2>
+    <fieldset class="hizSecimi">
+      <legend>Okuma hızı</legend>
+      <label><input type="radio" name="aiHiz" value="0.95" checked> İdeal</label>
+      <label><input type="radio" name="aiHiz" value="1.2"> Hızlı</label>
+    </fieldset>
+    <div id="aiOynatici" class="gizli">
+      <p id="aiIlerleme"></p>
+      <p id="aiSimdiki" class="kart" style="padding:14px;border-radius:12px"></p>
+      <button id="aiDuraklatBtn" class="ikincil">Duraklat</button>
+      <button id="aiDurdurBtn" class="ikincil">Okumayı bitir</button>
+      <a id="aiIndir" class="baglanti gizli" download="sen-anlat-okuma.wav">Sesi indir (WAV)</a>
+    </div>
+    <p>PDF'ini yükle, yapay zekâ senin için sesli okusun. Okurken hızı değiştirebilirsin. Metin formül ve işlem içeriyorsa seni bir gönüllüye yönlendiririz.</p>
+    <label for="aiPdf">PDF dosyası</label>
+    <input type="file" id="aiPdf" accept="application/pdf">
+    <p id="aiSayfaBilgi" class="bos"></p>
+    <div class="sayfaAraligi">
+      <div><label for="aiBaslangic">Başlangıç sayfası</label>
+        <input id="aiBaslangic" type="number" min="1" value="1" inputmode="numeric"></div>
+      <div><label for="aiBitis">Bitiş sayfası</label>
+        <input id="aiBitis" type="number" min="1" inputmode="numeric" placeholder="Son sayfa"></div>
+    </div>
+    <button id="aiBaslatBtn">Okumaya başla</button>
+
+    <div id="aiYonlendirme" class="uyari gizli">
+      <p id="aiYonlendirmeMetin"></p>
+      <button id="aiGonulluRandevu">Gönüllüden randevu al</button>
+      <button id="aiGonulluAra" class="ikincil">Şu an müsait bir gönüllüyü ara</button>
+      <button id="aiYineDeOku" class="ikincil">Yine de yapay zekâ okusun</button>
+    </div>
+
+
+    <button class="ikincil" id="aiGeri">Geri</button>
+  </section>
+
+  <!-- DERS DEĞERLENDİRME -->
+  <section id="degerlendirmeEkrani" class="gizli" aria-labelledby="degerlendirmeBaslik">
+    <h2 id="degerlendirmeBaslik">Dersi değerlendir</h2>
+    <p id="degerlendirmeBilgi"></p>
+    <form id="degerlendirmeFormu">
+      <div id="kriterler"></div>
+      <label for="yorum">Yorumun (isteğe bağlı)</label>
+      <textarea id="yorum" maxlength="500" placeholder="Anlatıcıya iletmek istediğin bir şey var mı?"></textarea>
+      <button type="submit">Değerlendirmeyi gönder</button>
+    </form>
+    <button class="ikincil" id="degerlendirmeAtla">Şimdi değil</button>
+  </section>
+
+  <!-- GEÇMİŞ DERSLER -->
+  <section id="gecmisEkrani" class="gizli" aria-labelledby="gecmisBaslik">
+    <h2 id="gecmisBaslik">Geçmiş derslerim</h2>
+    <ul id="gecmisListe"></ul>
+    <button class="ikincil" id="gecmisGeri">Geri</button>
+  </section>
+
+  <!-- RANDEVU ALMA -->
+  <section id="randevuEkrani" class="gizli" aria-labelledby="randevuBaslik">
+    <h2 id="randevuBaslik">Ders randevusu al</h2>
+    <div id="randevuIcerik"></div>
+    <button class="ikincil" id="randevuGeri">Geri</button>
+  </section>
+
+  <!-- PROFİL -->
+  <section id="profilEkrani" class="gizli" aria-labelledby="profilBaslik">
+    <h2 id="profilBaslik">Derslerim ve saatlerim</h2>
+    <div id="profilDersler"></div>
+    <label class="anahtar gizli" id="profilKayitIzniKutu"><input type="checkbox" role="switch" id="profilKayitIzni"> Görüşmelerimin kaydedilmesine izin veriyorum (derse katılacak kişi bunu görür)</label>
+    <label class="anahtar gizli" id="profilOkuyucuKutu"><input type="checkbox" id="profilOkuyucu"> Metin okuma gönüllüsüyüm: PDF ve not okuyabilirim</label>
+    <div id="profilMusaitlikKutu" class="gizli">
+      <h3>Müsait olduğum saatler</h3>
+      <div id="profilMusaitlik"></div>
+    </div>
+    <button id="profilKaydet">Kaydet</button>
+    <button class="ikincil" id="profilGeri">Vazgeç</button>
+  </section>
+
+  <!-- GÖRÜŞME -->
+  <section id="gorusmeEkrani" class="gizli" aria-labelledby="gorusmeBaslik">
+    <h2 id="gorusmeBaslik">Görüşme</h2>
+    <p id="gorusmeDurum"></p>
+    <p id="gorusmeBilgi"></p>
+    <p id="gorusmeSure" class="sure" role="timer" aria-live="off" aria-label="Görüşme süresi">00:00</p>
+    <p id="kayitGosterge" class="uyari gizli"></p>
+    <button id="kapatBtn" class="tehlike">Dersi bitir</button>
+
+
+    <!-- Öğrenci: belge gönder -->
+    <div id="belgeGonderKutu" class="gizli">
+      <h3>Okunacak belge</h3>
+      <label for="belgeSec">PDF dosyası veya sayfa fotoğrafı seç</label>
+      <input type="file" id="belgeSec" accept="application/pdf,image/*">
+      <button id="belgeGonderBtn" disabled>Belgeyi gönüllüye gönder</button>
+      <p id="belgeDurum" aria-live="polite">Bağlantı kurulunca belge gönderebilirsin.</p>
+    </div>
+
+    <!-- Gönüllü: gelen belge -->
+    <div id="belgeGorKutu" class="gizli">
+      <h3 id="belgeBaslik">Gelen belge</h3>
+      <p id="belgeBilgi"></p>
+      <a id="belgeAc" class="baglanti" target="_blank" rel="noopener">Belgeyi yeni sekmede aç</a>
+      <div id="belgeSayfalar"></div>
+    </div>
+  </section>
+
+  <p id="mesaj" role="status" aria-live="polite"></p>
+  <audio id="uzakSes" autoplay></audio>
+  <!-- HUKUKİ METİNLER (kayıt ve onay ekranlarına kopyalanır). Köşeli parantezli yerler doldurulmalıdır. -->
+  <template id="hukukiMetinlerSablon">
+    <details class="hukuki">
+      <summary>KVKK Aydınlatma Metni</summary>
+      <div class="hukukiMetin">
+        <p><strong>Veri sorumlusu:</strong> Sen Anlat proje ekibi, [AD SOYAD / KURUM], iletişim: [E-POSTA ADRESİ].</p>
+        <p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, Sen Anlat'ı kullanırken işlenen kişisel verilerin hakkında seni bilgilendiriyoruz.</p>
+        <p><strong>İşlenen veriler:</strong> ad soyad, üniversite e-posta adresi, seçtiğin dersler, müsait saatlerin, randevu ve görüşme bilgileri (tarih, süre, ders, karşı taraf), verdiğin ve aldığın değerlendirmeler ve görüşmelerin ses kayıtları.</p>
+        <p><strong>Özel nitelikli veri:</strong> "Destek almak istiyorum" rolünü seçmen, görme engelin olduğu anlamına gelebilir. Bu bilgi sağlık verisi sayılabileceğinden yalnızca açık rızanla işlenir.</p>
+        <p><strong>Ses kayıtları (isteğe bağlı):</strong> Görüşmenin kaydedilip kaydedilmeyeceğine gönüllü karar verir; bu tercihini dilediği zaman "Derslerim" ekranından değiştirebilir. Destek alan öğrenci, gönüllünün kayda izin verip vermediğini görüşmeden önce görür ve kaydedilen bir görüşmeye katılıp katılmamaya kendisi karar verir. Kaydedilen bir görüşmeye katılmak, o görüşmenin kaydına izin vermek anlamına gelir; dilediğin zaman görüşmeyi sonlandırabilirsin. Görüşmeler iki tarafın kendi cihazında kaydedilir. Kayıtlar sunucuya yüklenmez, yalnızca kaydeden kişinin cihazında saklanır ve 90 gün sonra cihazdan otomatik silinir. Kayıt yapılırken ekranda her zaman gösterilir.</p>
+        <p><strong>Paylaşılan belgeler:</strong> Görüşmede gönderilen PDF ve fotoğraflar sunucuya yüklenmez, doğrudan karşı tarafa iletilir ve görüşme bitince silinir. Yapay zekâ ile okuma tamamen cihazında yapılır.</p>
+        <p><strong>İşleme amaçları:</strong> hesabının oluşturulması ve doğrulanması, öğrencilerin gönüllülerle eşleştirilmesi, randevu ve görüşmelerin yürütülmesi, bildirim gönderilmesi, görüşmelerin tekrar dinlenebilmesi, hizmet kalitesinin ölçülmesi ve kötüye kullanımın önlenmesi.</p>
+        <p><strong>Hukuki sebepler:</strong> KVKK madde 5/2-c (sözleşmenin kurulması ve ifası), 5/2-f (meşru menfaat) ve ses kayıtları, özel nitelikli veriler ile yurt dışına aktarım için madde 5/1, 6 ve 9 kapsamında açık rızan.</p>
+        <p><strong>Aktarım:</strong> Hesap ve uygulama verileri Google Firebase altyapısında (Avrupa'daki sunucularda) saklanır; bu nedenle yurt dışına aktarılır. Sitenin barındırılması için Netlify kullanılır. Veriler başka hiçbir üçüncü kişiyle paylaşılmaz ve satılmaz; yalnızca yasal zorunluluk hâlinde yetkili mercilerle paylaşılabilir.</p>
+        <p><strong>Saklama süresi:</strong> Hesap verileri hesabın açık kaldığı sürece, hesap silindikten sonra en fazla 6 ay saklanır. Cihazdaki ses kayıtları 90 gün sonra silinir.</p>
+        <p><strong>Hakların (KVKK madde 11):</strong> verilerinin işlenip işlenmediğini öğrenme, bilgi isteme, düzeltilmesini veya silinmesini isteme, aktarıldığı kişileri öğrenme, itiraz etme ve zararın giderilmesini talep etme. Başvuru için: [E-POSTA ADRESİ]. Açık rızanı dilediğin zaman geri alabilirsin; bu durumda hesabın kapatılır.</p>
+      </div>
+    </details>
+    <details class="hukuki">
+      <summary>Açık Rıza Metni</summary>
+      <div class="hukukiMetin">
+        <p>Aydınlatma metnini okudum. Aşağıdaki konularda özgür irademle açık rıza veriyorum:</p>
+        <ul class="madde">
+          <li>Seçtiğim rolün (destek alan öğrenci) görme engelime ilişkin bilgi içerebilmesi nedeniyle bu özel nitelikli verinin eşleştirme amacıyla işlenmesi,</li>
+          <li>Verilerimin Google Firebase altyapısı aracılığıyla yurt dışındaki sunucularda saklanması.</li>
+        </ul>
+        <p><strong>Ses kayıtları:</strong> Gönüllüysem ve kayda izin verirsem anlattığım derslerin; destek alan öğrenciysem kaydedileceği bana gösterilen bir görüşmeye katıldığımda o görüşmenin tarafların cihazlarında kaydedilmesine ve 90 gün saklanmasına açık rıza veriyorum. Kayda izin vermemek ya da kaydedilen görüşmelere katılmamak uygulamayı kullanmama engel değildir.</p>
+      </div>
+    </details>
+    <details class="hukuki">
+      <summary>Kullanım Koşulları</summary>
+      <div class="hukukiMetin">
+        <ul class="madde">
+          <li>Sen Anlat, öğrenciler arası gönüllü bir dayanışma platformudur; resmî eğitim hizmeti değildir. Gönüllülerin anlatımlarının doğruluğu garanti edilmez.</li>
+          <li>Yalnızca kendi üniversite e-postanla, gerçek bilgilerinle tek bir hesap açabilirsin.</li>
+          <li>Görüşme kayıtlarını yalnızca kişisel ders çalışman için kullanabilirsin. Kayıtları karşı tarafın izni olmadan başkalarıyla paylaşmak, yayımlamak ya da internete yüklemek yasaktır ve TCK madde 133-134 ile KVKK kapsamında suç oluşturabilir.</li>
+          <li>Hakaret, taciz, ayrımcılık, ticari amaçlı kullanım, ücret talep etme ve sınavlarda kopya yardımı yasaktır. Bu kurallara uymayan hesaplar kapatılır.</li>
+          <li>Paylaştığın belgelerin paylaşım hakkına sahip olduğundan emin olmalısın; telif hakkıyla korunan içerikleri yalnızca kişisel kullanım sınırlarında paylaş.</li>
+          <li>Yapay zekâ ile okutulan metinlerin sesi yapay olarak üretilir ve hatalar içerebilir.</li>
+          <li>Acil bir sağlık ya da güvenlik durumunda 112'yi ara; Sen Anlat bir acil yardım hizmeti değildir.</li>
+          <li>Kötüye kullanımı bildirmek için: [E-POSTA ADRESİ].</li>
+        </ul>
+      </div>
+    </details>
+  </template>
+</main>
+
+<script src="dersler.js"></script>
+<script src="ders-eslestirme.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+           onAuthStateChanged, signOut, sendEmailVerification, sendPasswordResetEmail }
+           from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, onSnapshot,
+           query, where, runTransaction, serverTimestamp }
+           from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCB5H-gZypHN6EsEK37Kg73uyHxie7cUR4",
+    authDomain: "sen-anlat-a3983.firebaseapp.com",
+    projectId: "sen-anlat-a3983",
+    storageBucket: "sen-anlat-a3983.firebasestorage.app",
+    messagingSenderId: "778040926445",
+    appId: "1:778040926445:web:258f6c22246b1248922ce4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  auth.languageCode = "tr"; // doğrulama ve şifre sıfırlama e-postaları Türkçe gelsin
+
+  const db = getFirestore(app);
+
+  // =========================================================
+  // DERS KATALOĞU (örnek liste; gerçek liste EBS'den çekilebilir)
+  // =========================================================
+  const BILGISAYAR = {
+    1: ["Matematik I", "Matematik II", "Fizik I", "Fizik II", "Lineer Cebir", "Programlamaya Giriş", "Bilgisayar Mühendisliğine Giriş"],
+    2: ["Veri Yapıları", "Ayrık Matematik", "Nesneye Dayalı Programlama", "Mantık Devreleri", "Diferansiyel Denklemler", "Olasılık ve İstatistik"],
+    3: ["Algoritma Analizi", "İşletim Sistemleri", "Veritabanı Yönetim Sistemleri", "Bilgisayar Ağları", "Yazılım Mühendisliği", "Bilgisayar Organizasyonu"],
+    4: ["Yapay Zekâ", "Bilgisayar Görmesi", "Bilgisayar Grafiği", "Bitirme Projesi"]
+  };
+  const KATALOG = {
+    "Veri Bilimi ve Analitiği": {
+      1: ["Matematik I", "Matematik II", "Lineer Cebir", "Programlamaya Giriş (Python)", "Veri Bilimine Giriş", "Ayrık Matematik"],
+      2: ["Olasılık", "İstatistik", "Veri Yapıları ve Algoritmalar", "Veritabanı Yönetim Sistemleri", "Nesneye Dayalı Programlama", "Sayısal Yöntemler"],
+      3: ["Makine Öğrenmesi", "Veri Madenciliği", "Veri Görselleştirme", "Büyük Veri Teknolojileri", "Zaman Serisi Analizi", "Optimizasyon"],
+      4: ["Derin Öğrenme", "Doğal Dil İşleme", "Bulut Bilişim", "Bitirme Projesi"]
+    },
+    "Bilgisayar Mühendisliği": BILGISAYAR,
+    "Yazılım Mühendisliği": BILGISAYAR,
+    "Bilişim Sistemleri Mühendisliği": BILGISAYAR,
+    "Endüstri Mühendisliği": {
+      1: ["Matematik I", "Matematik II", "Fizik I", "Programlamaya Giriş"],
+      2: ["Olasılık", "İstatistik", "Yöneylem Araştırması I", "Mühendislik Ekonomisi"],
+      3: ["Üretim Planlama", "Simülasyon", "Kalite Kontrol", "Yöneylem Araştırması II"],
+      4: ["Tesis Planlama", "Bitirme Projesi"]
+    },
+    "İşletme": {
+      1: ["İşletmeye Giriş", "Genel Muhasebe", "Mikro İktisat", "Matematik"],
+      2: ["Maliyet Muhasebesi", "İstatistik", "Pazarlama İlkeleri"],
+      3: ["Finansal Yönetim", "Üretim Yönetimi", "Örgütsel Davranış"],
+      4: ["Stratejik Yönetim", "Uluslararası İşletmecilik"]
+    },
+    "İktisat": {
+      1: ["İktisada Giriş", "Matematik", "Hukukun Temel Kavramları"],
+      2: ["Mikro İktisat", "Makro İktisat", "İstatistik"],
+      3: ["Ekonometri", "Para Teorisi", "Uluslararası İktisat"],
+      4: ["Kalkınma İktisadı", "Türkiye Ekonomisi"]
+    },
+    "Hukuk": {
+      1: ["Hukuk Başlangıcı", "Medeni Hukuk", "Anayasa Hukuku", "Roma Hukuku"],
+      2: ["Borçlar Hukuku Genel", "Ceza Hukuku Genel", "İdare Hukuku"],
+      3: ["Ticaret Hukuku", "Eşya Hukuku", "Medeni Usul Hukuku"],
+      4: ["İcra İflas Hukuku", "Miras Hukuku", "Milletlerarası Özel Hukuk"]
+    },
+    "Psikoloji": {
+      1: ["Psikolojiye Giriş", "Sosyolojiye Giriş", "Biyolojik Psikoloji"],
+      2: ["Gelişim Psikolojisi", "Sosyal Psikoloji", "İstatistik"],
+      3: ["Bilişsel Psikoloji", "Klinik Psikoloji", "Araştırma Yöntemleri"],
+      4: ["Psikopatoloji", "Psikolojik Testler"]
+    }
+  };
+  const ORTAK = { 1: ["Türk Dili", "Atatürk İlkeleri ve İnkılap Tarihi", "İngilizce"] };
+  // "Listede olmayan dersler" kutusu için öneriler
+  const YAYGIN_DERSLER = [
+    "Sayısal Analiz", "Sayısal Yöntemler", "Kalkülüs", "Analiz I", "Analiz II", "Soyut Matematik", "Topoloji", "Kompleks Analiz",
+    "Genel Fizik", "Modern Fizik", "Kuantum Fiziği", "Elektromanyetik Teori", "Genel Kimya", "Organik Kimya", "Analitik Kimya", "Fizikokimya", "Biyokimya",
+    "Genel Biyoloji", "Hücre Biyolojisi", "Genetik", "Mikrobiyoloji", "Anatomi", "Fizyoloji", "Farmakoloji", "Histoloji",
+    "Statik", "Dinamik", "Mukavemet", "Termodinamik", "Akışkanlar Mekaniği", "Isı Transferi", "Malzeme Bilimi", "Makine Elemanları",
+    "Devre Analizi", "Elektronik", "Sinyaller ve Sistemler", "Kontrol Sistemleri", "Mikroişlemciler", "Gömülü Sistemler",
+    "Web Programlama", "Mobil Programlama", "Bilgisayar Ağları", "Siber Güvenlik", "Bulut Bilişim", "Yapay Zekâ", "Makine Öğrenmesi",
+    "Veri Madenciliği", "Veri Görselleştirme", "Derin Öğrenme", "Doğal Dil İşleme", "Bilgisayar Görmesi",
+    "Genel Muhasebe", "Maliyet Muhasebesi", "Finansal Yönetim", "Pazarlama İlkeleri", "İnsan Kaynakları Yönetimi", "Örgütsel Davranış",
+    "Mikro İktisat", "Makro İktisat", "Ekonometri", "Para ve Banka", "Kamu Maliyesi", "Uluslararası İktisat",
+    "Anayasa Hukuku", "Medeni Hukuk", "Borçlar Hukuku", "Ceza Hukuku", "İdare Hukuku", "Ticaret Hukuku", "İş Hukuku",
+    "Siyaset Bilimi", "Uluslararası İlişkiler", "Kamu Yönetimi", "Sosyoloji", "Felsefe", "Mantık", "Etik",
+    "Osmanlı Tarihi", "Cumhuriyet Tarihi", "Avrupa Tarihi", "Türk Edebiyatı", "Divan Edebiyatı", "Halk Edebiyatı", "Dilbilim",
+    "Eğitim Psikolojisi", "Gelişim Psikolojisi", "Sosyal Psikoloji", "Ölçme ve Değerlendirme", "Öğretim İlke ve Yöntemleri", "Sınıf Yönetimi",
+    "Akademik Yazma", "Araştırma Yöntemleri", "Bilimsel Araştırma Teknikleri", "Girişimcilik", "Proje Yönetimi", "İş Sağlığı ve Güvenliği"
+  ];
+  const kullaniciDersleri = new Set(); // aynı bölümden kişilerin eklediği dersler (girişten sonra dolar)
+  function oneriHavuzu() {
+    const hepsi = new Set([...YAYGIN_DERSLER, ...kullaniciDersleri]);
+    Object.values(KATALOG).forEach(b => Object.values(b).forEach(l => l.forEach(d => hepsi.add(d))));
+    Object.values(ORTAK).forEach(l => l.forEach(d => hepsi.add(d)));
+    DersEslestirme.tumDersler().forEach(d => hepsi.add(d));
+    (window.TUM_DERSLER || []).forEach(d => hepsi.add(d)); // dersler.js: üniversitelerde verilen dersler
+    return [...hepsi];
+  }
+  // Ders anlatımı değil, metni sesli okuma. Bölüm ve sınıf fark etmez.
+  const OKUMA = "Metin okuma (PDF)";
+  const izinMetni = (v) => v ? "kayda izin veriyor" : "kayda izin vermiyor";
+  // Hukuki metinler değiştiğinde sürümü artır: herkesten yeniden onay istenir
+  const KVKK_SURUM = "1.2";
+  document.querySelectorAll(".hukukiMetinler").forEach(k =>
+    k.append($("hukukiMetinlerSablon").content.cloneNode(true)));
+  const BOLUMLER = [...Object.keys(KATALOG), "Elektrik-Elektronik Mühendisliği", "Makine Mühendisliği",
+                    "İnşaat Mühendisliği", "Tarih", "Türk Dili ve Edebiyatı", "Sınıf Öğretmenliği", "Hemşirelik", "Diğer"];
+
+
+  // =========================================================
+  // GENEL
+  // =========================================================
+  function $(id) { return document.getElementById(id); }
+  // Görüşme ya da yapay zekâ okuması sırasında ekran okuyucu yalnızca kritik mesajları okur;
+  // diğerleri sessiz bir alana yazılır, böylece karşıdaki ses bölünmez.
+  let sessizMod = false;
+  function mesaj(t, kritik = false) {
+    if (sessizMod && !kritik && t) {
+      const alan = $("gorusmeEkrani").classList.contains("gizli") ? $("aiIlerleme") : $("gorusmeBilgi");
+      alan.textContent = t;
+      return;
+    }
+    $("mesaj").textContent = t;
+  }
+
+  function el(tag, attrs = {}, ...cocuklar) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") e.className = v; else e.setAttribute(k, v);
+    }
+    cocuklar.forEach(c => e.append(c));
+    return e;
+  }
+
+  const SAAT_MS = 60 * 60 * 1000;
+  const iki = (n) => String(n).padStart(2, "0");
+  const saatYaz = (t) => `${iki(t.getHours())}:00`;
+  const tarihYaz = (ms) => new Date(ms).toLocaleString("tr-TR",
+    { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+
+  let ben = null;            // giriş yapan kullanıcı
+  let randevularim = [];
+  let panelAboneler = [];    // ana ekran dinleyicileri
+  let pc = null, yerelAkis = null, aktifAramaId = null;
+  let aboneler = [];         // görüşme dinleyicileri
+  let gelenDinleyici = null, sonGelenDocs = [];
+  const gorulenAramalar = new Set();
+
+  const EKRANLAR = ["kayitBolumu", "girisBolumu", "dogrulamaEkrani", "onayEkrani", "yardimEkrani", "rehberEkrani", "aiOkumaEkrani", "degerlendirmeEkrani", "gecmisEkrani", "anaEkran", "randevuEkrani", "profilEkrani", "gorusmeEkrani"];
+  let aktifEkran = null, rehberOncesi = null;
+  function goster(bolum) {
+    aktifEkran = bolum;
+    document.body.classList.toggle("anaEkranda", bolum === "anaEkran");
+    EKRANLAR.forEach(id => $(id).classList.toggle("gizli", id !== bolum));
+    const baslik = $(bolum).querySelector("h2");
+    baslik.setAttribute("tabindex", "-1");
+    baslik.focus(); // ekran okuyucu yeni ekranın başlığını okur
+  }
+
+  // =========================================================
+  // DERS SEÇİCİ ve MÜSAİTLİK IZGARASI
+  // =========================================================
+  function bolumDersleri(bolum) {
+    const k = KATALOG[bolum] || {};
+    return [1, 2, 3, 4].map(s => ({ sinif: s, dersler: [...(k[s] || []), ...(ORTAK[s] || [])] }));
+  }
+
+  function dersSeciciCiz(kutu, bolum, sinif, rol, secili = [], degisti = null) {
+    kutu.innerHTML = "";
+    // Bölüm/sınıf sorulmuyor: herkes dersini yazarak ya da sesle arayıp seçer
+    return aramaliSeciciCiz(kutu, bolum, secili, degisti);
+  }
+
+  // ---------- Öğrenci için aramalı (ve sesli) ders seçici ----------
+  const SesTanima = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  // Yazarak ya da sesle ders arama kutusu. secildi(d) seçilen dersle çağrılır.
+  function dersAramaKur(kutu, { id, etiket, havuz, haric = () => false, secildi, serbestMetin = (y) => `"${y}" dersini ekle`, sesliIpucu = "eklemek" }) {
+    kutu.append(el("label", { for: id }, etiket));
+    const satir = el("div", { class: "aramaSatiri" });
+    const giris = el("input", { id, type: "search", autocomplete: "off", placeholder: "Örneğin lineer cebir" });
+    const mikrofon = el("button", { type: "button", class: "mikrofonBtn", "aria-label": "Ders adını sesle söyle" });
+    mikrofon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v5"/></svg><span>Sesle söyle</span>';
+    satir.append(giris, mikrofon);
+    kutu.append(satir);
+    if (!SesTanima) {
+      mikrofon.classList.add("gizli");
+    }
+    const sonuclar = el("ul", { class: "oneriler gizli", "aria-label": "Arama sonuçları" });
+    kutu.append(sonuclar);
+
+    const sec = (d) => {
+      giris.value = "";
+      sonuclar.classList.add("gizli"); sonuclar.innerHTML = "";
+      secildi(d.trim());
+    };
+    let sonSayi = -1;
+    function ara(duyur = true) {
+      const yazilan = giris.value.trim(), q = dersNorm(yazilan);
+      sonuclar.innerHTML = "";
+      if (!q) { sonuclar.classList.add("gizli"); sonSayi = -1; return 0; }
+      // Akıllı arama: yazım/ses tanıma hataları, "bir/iki" gibi sayı kelimeleri ve eşdeğer ders adları
+      const adaylar = DersEslestirme.ara(yazilan, havuz(), { haric, enFazla: 8 });
+      const butonlar = adaylar.map(d => {
+        const b = el("button", { type: "button" }, d);
+        b.onclick = () => sec(d);
+        return b;
+      });
+      // Listede yoksa yazdığını olduğu gibi kullanma seçeneği (kısmi yazımlarda gösterme)
+      if (serbestMetin && !havuz().some(d => dersNorm(d) === q) && !haric(yazilan) && (!adaylar.length || yazilan.length >= 6)) {
+        const b = el("button", { type: "button" }, serbestMetin(yazilan));
+        b.onclick = () => sec(yazilan);
+        butonlar.push(b);
+      }
+      butonlar.forEach(b => {
+        b.addEventListener("keydown", (e) => {
+          const tumu = [...sonuclar.querySelectorAll("button")], s_ = tumu.indexOf(b);
+          if (e.key === "ArrowDown") { e.preventDefault(); (tumu[s_ + 1] || tumu[0]).focus(); }
+          if (e.key === "ArrowUp") { e.preventDefault(); s_ > 0 ? tumu[s_ - 1].focus() : giris.focus(); }
+          if (e.key === "Escape") { sonuclar.classList.add("gizli"); giris.focus(); }
+        });
+        sonuclar.append(el("li", {}, b));
+      });
+      sonuclar.classList.toggle("gizli", !butonlar.length);
+      if (duyur && adaylar.length !== sonSayi) mesaj(adaylar.length ? `${adaylar.length} ders bulundu.` : "Listede bulunamadı, yazdığın adla devam edebilirsin.");
+      sonSayi = adaylar.length;
+      return adaylar.length;
+    }
+    giris.addEventListener("input", () => ara());
+    giris.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") { e.preventDefault(); sonuclar.querySelector("button")?.focus(); }
+      if (e.key === "Enter") { e.preventDefault(); sonuclar.querySelector("button")?.click(); }
+    });
+
+    // Sesle arama (tarayıcının konuşma tanıma özelliği, Türkçe)
+    let tanima = null;
+    mikrofon.onclick = () => {
+      if (tanima) { tanima.stop(); return; }
+      tanima = new SesTanima();
+      tanima.lang = "tr-TR"; tanima.interimResults = false; tanima.maxAlternatives = 1;
+      tanima.onstart = () => {
+        mikrofon.setAttribute("aria-pressed", "true");
+        mikrofon.querySelector("span").textContent = "Dinliyorum…";
+        ton("baglandi");
+        mesaj("Dinliyorum, ders adını söyle.", true);
+      };
+      tanima.onresult = (e) => {
+        const metin = e.results[0][0].transcript.replace(/[.!?]+$/, "").trim();
+        giris.value = metin;
+        const n = ara(false);
+        mesaj(n ? `"${metin}" için ${n} ders bulundu. İlk sonuçtasın, ${sesliIpucu} için iki kez dokun.`
+                : `"${metin}" listede bulunamadı. Bu adla devam etmek için iki kez dokun.`, true);
+        sonuclar.querySelector("button")?.focus();
+      };
+      tanima.onerror = (e) => {
+        mesaj(e.error === "not-allowed" ? "Mikrofon izni verilmedi. Ayarlardan bu site için mikrofona izin verebilirsin."
+          : e.error === "no-speech" ? "Ses algılanmadı, tekrar dene." : "Ses tanınamadı, tekrar dene ya da yazarak ara.", true);
+      };
+      tanima.onend = () => {
+        tanima = null;
+        mikrofon.removeAttribute("aria-pressed");
+        mikrofon.querySelector("span").textContent = "Sesle söyle";
+      };
+      try { tanima.start(); } catch { tanima = null; }
+    };
+    return { giris };
+  }
+
+  function aramaliSeciciCiz(kutu, bolum, secili, degisti = null) {
+    kutu.innerHTML = "";
+    const seciler = [...secili];
+    const havuzListe = [...new Set([...bolumDersleri(bolum).flatMap(g => g.dersler), ...oneriHavuzu()])];
+    const seciliMi = (d) => seciler.some(x => dersNorm(x) === dersNorm(d));
+    const seciliListe = el("ul", { class: "seciliDersler" });
+
+    const { giris } = dersAramaKur(kutu, {
+      id: kutu.id + "Ara", etiket: "Ders adını yaz ya da sesle söyle",
+      havuz: () => havuzListe, haric: seciliMi,
+      secildi: (d) => {
+        if (!d) return;
+        if (!seciliMi(d)) seciler.push(havuzListe.find(x => dersNorm(x) === dersNorm(d)) || d);
+        seciliCiz();
+        mesaj(`${d} eklendi. ${seciler.length} ders seçili.`);
+        degisti?.([...seciler]);
+        giris.focus();
+      }
+    });
+    seciliListe.setAttribute("aria-label", "Seçtiğin dersler");
+    kutu.append(seciliListe);
+
+    function seciliCiz() {
+      seciliListe.innerHTML = "";
+      seciler.forEach(d => {
+        // Gizli işaretli kutu: seçilen dersler formdan bu şekilde okunur
+        const kutucuk = el("input", { type: "checkbox", value: d, class: "gizli", tabindex: "-1", "aria-hidden": "true" });
+        kutucuk.checked = true;
+        const kaldir = el("button", { type: "button", class: "ikincil", "aria-label": `${d} dersini kaldır` }, "Kaldır");
+        kaldir.onclick = () => {
+          seciler.splice(seciler.indexOf(d), 1);
+          seciliCiz();
+          mesaj(`${d} kaldırıldı. ${seciler.length} ders seçili.`);
+          degisti?.([...seciler]);
+          giris.focus();
+        };
+        seciliListe.append(el("li", { class: "kart" }, el("span", {}, d), kutucuk, kaldir));
+      });
+    }
+    seciliCiz();
+  }
+
+  // Virgülle ayrılmış kutuda, yazılan son ders adına göre öneri gösterir
+  function oneriKur(inp, ul) {
+    let sonSayi = -1;
+    const kapat = () => { ul.classList.add("gizli"); ul.innerHTML = ""; sonSayi = -1; };
+    const guncelle = () => {
+      const parcalar = inp.value.split(",");
+      const yazilan = parcalar[parcalar.length - 1].trim();
+      const q = dersNorm(yazilan);
+      if (q.length < 2) return kapat();
+      const girilenler = new Set(parcalar.slice(0, -1).map(x => dersNorm(x)));
+      const adaylar = DersEslestirme.ara(yazilan, oneriHavuzu(), {
+        haric: d => girilenler.has(dersNorm(d)) || dersNorm(d) === q, enFazla: 6 });
+      ul.innerHTML = "";
+      if (!adaylar.length) return kapat();
+      adaylar.forEach(d => {
+        // Yazılan kısmı vurgula (görenler için); ekran okuyucu ders adını okur
+        const b = el("button", { type: "button" });
+        const i = dersNorm(d).indexOf(q);
+        if (i >= 0 && dersNorm(d).length === d.length) {
+          b.append(d.slice(0, i), el("mark", {}, d.slice(i, i + q.length)), d.slice(i + q.length));
+        } else b.textContent = d;
+        b.onclick = () => {
+          parcalar[parcalar.length - 1] = (parcalar.length > 1 ? " " : "") + d;
+          inp.value = parcalar.join(",") + ", ";
+          kapat();
+          inp.focus();
+          mesaj(`${d} eklendi.`);
+        };
+        b.addEventListener("keydown", (e) => {
+          const tumu = [...ul.querySelectorAll("button")], s = tumu.indexOf(b);
+          if (e.key === "ArrowDown") { e.preventDefault(); (tumu[s + 1] || tumu[0]).focus(); }
+          if (e.key === "ArrowUp") { e.preventDefault(); s > 0 ? tumu[s - 1].focus() : inp.focus(); }
+          if (e.key === "Escape") { kapat(); inp.focus(); }
+        });
+        ul.append(el("li", {}, b));
+      });
+      ul.classList.remove("gizli");
+      if (adaylar.length !== sonSayi) mesaj(`${adaylar.length} öneri var.`);
+      sonSayi = adaylar.length;
+    };
+    inp.addEventListener("input", guncelle);
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown" && !ul.classList.contains("gizli")) { e.preventDefault(); ul.querySelector("button")?.focus(); }
+      if (e.key === "Escape") kapat();
+      if (e.key === "Enter" && !ul.classList.contains("gizli")) { e.preventDefault(); ul.querySelector("button")?.click(); }
+    });
+    // Kutudan ve önerilerden tamamen çıkınca listeyi kapat
+    inp.parentElement.addEventListener("focusout", () => setTimeout(() => {
+      if (!ul.contains(document.activeElement) && document.activeElement !== inp) kapat();
+    }, 150));
+  }
+
+  // Ders adlarını karşılaştırmak için sadeleştirir:
+  // "LİNEER  cebir 1" = "Lineer Cebir I", "Olasilik" = "Olasılık"
+  // "Matematik bir" = "Matematik 1" = "Matematik I" (ayrıntı: ders-eslestirme.js)
+  function dersNorm(ad) { return DersEslestirme.norm(ad); }
+
+  function seciliDersleriOku(kutu) {
+    const tumKutular = [...kutu.querySelectorAll('input[type="checkbox"]')];
+    const isaretli = tumKutular.filter(c => c.checked).map(c => c.value);
+    const ekstraKutu = kutu.querySelector(".ekstraDers");
+    const ekstra = ekstraKutu ? ekstraKutu.value.split(/[,;\n]/).map(s => s.trim()).filter(Boolean) : [];
+    // Elle yazılan ders listede varsa listedeki adıyla kaydet
+    // Küçük yazım hataları da düzeltilir: "liner cebir" → "Lineer Cebir"
+    const ekstraDuzgun = ekstra.map(x => tumKutular.find(c => dersNorm(c.value) === dersNorm(x))?.value
+      || tumKutular.find(c => DersEslestirme.benzerlik(c.value, x) >= 0.9)?.value || x);
+    const sonuc = new Map();
+    [...isaretli, ...ekstraDuzgun].forEach(d => { if (!sonuc.has(dersNorm(d))) sonuc.set(dersNorm(d), d); });
+    return [...sonuc.values()];
+  }
+
+  const GUNLER = [[1, "Pazartesi"], [2, "Salı"], [3, "Çarşamba"], [4, "Perşembe"], [5, "Cuma"], [6, "Cumartesi"], [0, "Pazar"]];
+  const SAATLER = Array.from({ length: 13 }, (_, i) => i + 9); // 09:00 - 21:00 başlangıçlı
+
+  function musaitlikCiz(kutu, secili = []) {
+    kutu.innerHTML = "";
+    GUNLER.forEach(([g, ad]) => {
+      const d = el("details");
+      const sayi = secili.filter(x => x.startsWith(g + "-")).length;
+      d.append(el("summary", {}, `${ad}` + (sayi ? ` (${sayi} saat seçili)` : "")));
+      const izgara = el("div", { class: "saatIzgara" });
+      SAATLER.forEach(s => {
+        const cb = el("input", { type: "checkbox", value: `${g}-${s}`, "aria-label": `${ad} saat ${iki(s)}:00` });
+        cb.checked = secili.includes(`${g}-${s}`);
+        izgara.append(el("label", {}, cb, `${iki(s)}:00`));
+      });
+      d.append(izgara);
+      kutu.append(d);
+    });
+  }
+
+  // Önümüzdeki 7 gündeki boş saatler
+  function yaklasanSlotlar(musaitlik, dolu) {
+    const sonuc = [], simdi = Date.now();
+    for (let i = 0; i < 7; i++) {
+      const gun = new Date(); gun.setHours(0, 0, 0, 0); gun.setDate(gun.getDate() + i);
+      SAATLER.forEach(s => {
+        if (!musaitlik.includes(`${gun.getDay()}-${s}`)) return;
+        const t = new Date(gun); t.setHours(s);
+        if (t.getTime() > simdi && !dolu.has(t.getTime())) sonuc.push(t);
+      });
+    }
+    return sonuc;
+  }
+
+  // =========================================================
+  // KAYIT / GİRİŞ
+  // =========================================================
+  function kayitDersleriniYenile() {
+    const rol = document.querySelector('input[name="rol"]:checked')?.value;
+    $("kayitOkuyucuKutu").classList.toggle("gizli", rol !== "gonullu");
+    $("kayitSesIzniKutu").classList.toggle("gizli", rol !== "gonullu");
+  }
+  // Türkiye'deki üniversite e-postaları .edu.tr ile biter (ör. ogr.sakarya.edu.tr)
+  const universiteEpostasi = (eposta) => /\.edu\.tr$/i.test((eposta || "").trim().split("@")[1] || "");
+
+  document.querySelectorAll('input[name="rol"]').forEach(r => r.addEventListener("change", kayitDersleriniYenile));
+
+  const hataMetni = (kod) => ({
+    "auth/email-already-in-use": "Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin.",
+    "auth/invalid-email": "E-posta adresi geçersiz.",
+    "auth/weak-password": "Şifre en az 6 karakter olmalı.",
+    "auth/invalid-credential": "E-posta veya şifre hatalı.",
+    "auth/too-many-requests": "Çok fazla deneme yapıldı. Birkaç dakika sonra tekrar deneyin.",
+    "auth/missing-email": "Lütfen e-posta adresinizi yazın.",
+    "auth/network-request-failed": "İnternet bağlantısı yok gibi görünüyor."
+  }[kod] || "Bir hata oluştu: " + kod);
+
+  // ---------- E-posta doğrulama ----------
+  // Dönüş adresi verilmez: e-postadaki bağlantı Firebase'in kendi onay sayfasını açar,
+  // kullanıcı uygulamaya dönüp "Doğruladım"a basar. Böylece alan adı ayarına bağlı hata çıkmaz.
+  const dogrulamaAyari = () => undefined;
+
+  function dogrulamaGoster(user) {
+    $("dogrulamaMetin").textContent =
+      `${user.email} adresine bir doğrulama bağlantısı gönderdik. E-postadaki bağlantıya tıkla, sonra buraya dönüp "Doğruladım" butonuna bas.`;
+    goster("dogrulamaEkrani");
+  }
+
+  $("dogruladimBtn").onclick = async () => {
+    const user = auth.currentUser;
+    if (!user) return goster("girisBolumu");
+    await user.reload(); // doğrulama durumunu sunucudan yeniden al
+    if (auth.currentUser.emailVerified) {
+      await user.getIdToken(true); // güvenlik kuralları doğrulamayı görsün
+      mesaj("E-posta doğrulandı."); anaEkraniDoldur(user.uid);
+    }
+    else mesaj("Henüz doğrulanmamış görünüyor. E-postadaki bağlantıya tıkladığından emin ol.");
+  };
+
+  $("tekrarGonderBtn").onclick = async () => {
+    try {
+      await sendEmailVerification(auth.currentUser, dogrulamaAyari());
+      mesaj("Doğrulama e-postası tekrar gönderildi.");
+    } catch (err) { mesaj(hataMetni(err.code)); }
+  };
+
+  $("dogrulamaCikisBtn").onclick = () => signOut(auth);
+
+  // ---------- Hukuki onay ekranı ----------
+  $("onayKabulBtn").onclick = async () => {
+    if (!$("onayKvkk").checked || !$("onayRiza").checked) {
+      mesaj("Devam etmek için iki kutuyu da işaretlemen gerekiyor."); $("onayKvkk").focus(); return;
+    }
+    try {
+      await updateDoc(doc(db, "kullanicilar", auth.currentUser.uid),
+        { kvkk: { surum: KVKK_SURUM, tarih: serverTimestamp() }, ...(ben?.rol === "gonullu" ? { kayitIzni: $("onaySesIzni").checked } : {}) });
+      anaEkraniDoldur(auth.currentUser.uid);
+    } catch (err) { mesaj("Onay kaydedilemedi: " + (err.code || err.message)); }
+  };
+  $("onayCikisBtn").onclick = () => { signOut(auth); mesaj("Onay vermeden uygulamayı kullanamazsın. Dilediğin zaman tekrar giriş yapabilirsin."); };
+
+  // ---------- Şifremi unuttum ----------
+  $("sifremiUnuttumBtn").onclick = async () => {
+    const eposta = $("girisEposta").value.trim();
+    if (!eposta) { mesaj("Önce yukarıya e-posta adresini yaz, sonra Şifremi unuttum'a bas."); $("girisEposta").focus(); return; }
+    try {
+      await sendPasswordResetEmail(auth, eposta, dogrulamaAyari());
+      mesaj("Bu adres kayıtlıysa şifre sıfırlama bağlantısı gönderildi. Gereksiz klasörünü de kontrol et.");
+    } catch (err) { mesaj(hataMetni(err.code)); }
+  };
+
+  $("giriseGec").onclick = () => { mesaj(""); goster("girisBolumu"); };
+  $("kayitaGec").onclick = () => { mesaj(""); goster("kayitBolumu"); };
+
+  $("kayitFormu").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const rol = document.querySelector('input[name="rol"]:checked').value;
+    const okuyucu = rol === "gonullu" && $("kayitOkuyucu").checked;
+    if (!profilTamamlaModu && !universiteEpostasi($("kayitEposta").value)) {
+      mesaj("Sadece üniversite e-postasıyla (.edu.tr ile biten) kayıt olunabilir."); return;
+    }
+    if (!$("kayitKvkk").checked || !$("kayitRiza").checked) {
+      mesaj("Devam etmek için aydınlatma metnini ve açık rıza metnini onaylaman gerekiyor."); $("kayitKvkk").focus(); return;
+    }
+    mesaj(profilTamamlaModu ? "Profil kaydediliyor..." : "Kayıt yapılıyor...");
+    try {
+      // Profil tamamlama: hesap zaten var, sadece kullanıcı kaydı yeniden oluşturulur
+      const user = profilTamamlaModu
+        ? auth.currentUser
+        : (await createUserWithEmailAndPassword(auth, $("kayitEposta").value, $("kayitSifre").value)).user;
+      await setDoc(doc(db, "kullanicilar", user.uid), {
+        rol, okuyucu,
+        adSoyad: $("adSoyad").value.trim(),
+        dersler: [],
+        musaitlik: [],
+        musait: false,
+        kvkk: { surum: KVKK_SURUM, tarih: serverTimestamp() },
+        kayitIzni: rol === "gonullu" && $("kayitSesIzni").checked,
+        olusturma: serverTimestamp()
+      });
+      if (profilTamamlaModu) {
+        profilTamamlaKapat();
+        mesaj("Profilin kaydedildi.");
+        if (user.emailVerified) anaEkraniDoldur(user.uid); else dogrulamaGoster(user);
+        return;
+      }
+      await sendEmailVerification(user, dogrulamaAyari());
+      mesaj("Kayıt tamamlandı. Doğrulama e-postası gönderildi.");
+      dogrulamaGoster(user);
+    } catch (err) { mesaj(hataMetni(err.code)); }
+  });
+
+  $("girisFormu").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    mesaj("Giriş yapılıyor...");
+    try {
+      await signInWithEmailAndPassword(auth, $("girisEposta").value, $("girisSifre").value);
+      mesaj("");
+    } catch (err) { mesaj(hataMetni(err.code)); }
+  });
+
+  $("cikisBtn").onclick = async () => {
+    panelDinleyicileriDurdur();
+    if (ben?.rol === "gonullu") await updateDoc(doc(db, "kullanicilar", ben.uid), { musait: false });
+    ben = null;
+    signOut(auth);
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user && !universiteEpostasi(user.email)) {
+      panelDinleyicileriDurdur(); ben = null;
+      await signOut(auth);
+      goster("girisBolumu");
+      mesaj("Sen Anlat yalnızca üniversite e-postasıyla (.edu.tr) kullanılabilir. Lütfen okul e-postanla kayıt ol.");
+      return;
+    }
+    if (user && !user.emailVerified) { panelDinleyicileriDurdur(); ben = null; dogrulamaGoster(user); }
+    else if (user) {
+      try { if (!(await user.getIdTokenResult()).claims.email_verified) await user.getIdToken(true); } catch {}
+      anaEkraniDoldur(user.uid);
+    }
+    else { panelDinleyicileriDurdur(); profilTamamlaKapat(); goster("kayitBolumu"); }
+  });
+
+  // =========================================================
+  // ANA EKRAN
+  // =========================================================
+  // ---------- Profil tamamlama (hesap var ama kullanıcı kaydı silinmiş) ----------
+  let profilTamamlaModu = false;
+  function profilTamamlaAc() {
+    profilTamamlaModu = true;
+    $("kayitBaslik").textContent = "Profilini tamamla";
+    $("kayitGonderBtn").textContent = "Profili kaydet";
+    $("kayitHesapAlanlari").classList.add("gizli");
+    $("kayitEposta").required = false; $("kayitSifre").required = false;
+    $("kayitEposta").value = auth.currentUser?.email || ""; // .edu.tr kontrolü için
+    $("giriseGec").textContent = "Çıkış yap";
+    $("giriseGec").onclick = () => signOut(auth);
+    goster("kayitBolumu");
+    mesaj("Hesap bilgilerin bulunamadı. Lütfen profilini yeniden doldur, aynı hesapla devam edeceksin.");
+  }
+  function profilTamamlaKapat() {
+    if (!profilTamamlaModu) return;
+    profilTamamlaModu = false;
+    $("kayitBaslik").textContent = "Kayıt ol";
+    $("kayitGonderBtn").textContent = "Kayıt ol";
+    $("kayitHesapAlanlari").classList.remove("gizli");
+    $("kayitEposta").required = true; $("kayitSifre").required = true;
+    $("kayitEposta").value = "";
+    $("giriseGec").textContent = "Zaten hesabım var, giriş yap";
+    $("giriseGec").onclick = () => { mesaj(""); goster("girisBolumu"); };
+  }
+
+  async function anaEkraniDoldur(uid) {
+    let snap;
+    try { snap = await getDoc(doc(db, "kullanicilar", uid)); }
+    catch (err) { mesaj("Hesap bilgilerin yüklenemedi: " + (err.code || err.message)); return; }
+    if (!snap.exists()) { profilTamamlaAc(); return; }
+    profilTamamlaKapat();
+    ben = { uid, dersler: [], musaitlik: [], ...snap.data() };
+    if (ben.kvkk?.surum !== KVKK_SURUM) {
+      $("onaySesIzniKutu").classList.toggle("gizli", ben.rol !== "gonullu");
+      $("onaySesIzni").checked = !!ben.kayitIzni;
+      goster("onayEkrani"); return;
+    }
+    eskiKayitlariTemizle();
+    const gonullu = ben.rol === "gonullu";
+    // Öğrencide karşılama yazısı yok; başlık sadece ekran okuyucunun odaklanması için gizli durur
+    $("anaBaslik").textContent = "Ana ekran";
+    $("anaBaslik").classList.add("gorunmez");
+    document.body.classList.toggle("ogrenciRol", !gonullu);
+    $("ogrenciUst").classList.toggle("gizli", gonullu);
+    $("gonulluPanel").classList.toggle("gizli", !gonullu);
+    $("profilBtnMetin").textContent = gonullu ? "Derslerim ve saatlerim" : "Derslerim";
+    if (gonullu) {
+      $("musaitAnahtar").checked = false;
+      await updateDoc(doc(db, "kullanicilar", uid), { musait: false });
+    }
+    anaBilgiGuncelle();
+    panelDinleyicileriBaslat();
+    anaPaneliGoster();
+    if (gonullu) kendiPuaniniGoster();
+  }
+
+  function anaBilgiGuncelle() {
+    let uyari = "";
+    if (ben.rol === "gonullu") {
+      if (!ben.dersler.length && !ben.okuyucu) uyari = "Henüz ders seçmedin. Aşağıdan derslerini ekle ya da metin okuma gönüllüsü ol.";
+      else if (!ben.musaitlik.length) uyari = "Henüz müsait saat girmedin, öğrenciler senden randevu alamaz. Aşağıdan saatlerini ekle.";
+    }
+    $("uyari").textContent = uyari;
+    $("uyari").classList.toggle("gizli", !uyari);
+    $("okuyucuAnahtar").checked = !!ben.okuyucu;
+  }
+
+  function anaPaneliGoster() {
+    goster("anaEkran");
+    if (onayliGonullu() && !gelenDinleyici) gelenleriDinle();
+    randevulariCiz(true);
+  }
+
+  // Üniversite e-postası doğrulanmış her gönüllü arama alabilir
+  const onayliGonullu = () => ben?.rol === "gonullu";
+
+  let ilkRandevuYuklemesiBitti = false;
+  // Gönüllüye yeni randevu bildirimi: dosya kendiliğinden inmez (tarayıcılar engeller),
+  // tek dokunuşla takvime ekleme önerilir
+  function yeniRandevuHaberi(r) {
+    const konu = r.ders === OKUMA ? "metin okuma" : r.ders;
+    const metin = `Yeni randevu: ${r.ogrenciAd}, ${konu}, ${tarihYaz(r.baslangic)}.`;
+    ton("belge");
+    bildir("Sen Anlat: yeni randevu", metin, "randevu-" + r.id);
+    $("hatirlatma").innerHTML = "";
+    const ekle = el("button", {}, "Takvimime ekle");
+    ekle.onclick = () => { takvimeEkle(r); $("hatirlatma").classList.add("gizli"); };
+    $("hatirlatma").append(el("span", {}, metin), ekle);
+    $("hatirlatma").classList.remove("gizli");
+    mesaj(metin + " Takvimine eklemek için Takvimime ekle butonuna bas.");
+  }
+
+  function panelDinleyicileriBaslat() {
+    panelDinleyicileriDurdur();
+    ilkRandevuYuklemesiBitti = false;
+    const alan = ben.rol === "gonullu" ? "gonulluUid" : "ogrenciUid";
+    panelAboneler.push(onSnapshot(query(collection(db, "randevular"), where(alan, "==", ben.uid)), (snap) => {
+      const oncekiler = new Set(randevularim.map(r => r.id));
+      randevularim = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (ben.rol === "gonullu" && ilkRandevuYuklemesiBitti) {
+        const yeni = randevularim.find(r => r.durum === "aktif" && !oncekiler.has(r.id) && r.baslangic > Date.now());
+        if (yeni) yeniRandevuHaberi(yeni);
+      }
+      ilkRandevuYuklemesiBitti = true;
+      randevulariCiz(true);
+      hatirlatmalariKontrolEt();
+    }));
+    if (onayliGonullu()) gelenleriDinle();
+  }
+
+  function panelDinleyicileriDurdur() {
+    panelAboneler.forEach(f => f()); panelAboneler = [];
+    gelenleriBirak();
+    randevularim = [];
+  }
+
+  // ---------- Randevu listesi ----------
+  let sonCizim = "";
+  function randevulariCiz(zorla = false) {
+    if (!ben) return;
+    const simdi = Date.now();
+    const yaklasan = randevularim
+      .filter(r => r.durum === "aktif" && r.baslangic + SAAT_MS > simdi)
+      .sort((a, b) => a.baslangic - b.baslangic);
+    const acikMi = (r) => simdi >= r.baslangic - 10 * 60 * 1000; // 10 dk önceden açılır
+    const anahtar = yaklasan.map(r => r.id + (acikMi(r) ? "1" : "0")).join();
+    if (!zorla && anahtar === sonCizim) return; // odak kaybolmasın diye gereksiz yere yeniden çizme
+    sonCizim = anahtar;
+
+    const ul = $("randevuListe");
+    ul.innerHTML = "";
+    // Öğrenci panelinde bloklar dışında yazı yok: başlık ve "randevun yok" yazısı gösterilmez
+    $("randevuBaslikAna").classList.add("gizli");
+    yaklasan.forEach(r => {
+      const karsi = ben.rol === "gonullu" ? r.ogrenciAd : r.gonulluAd;
+      const karsiIzin = ben.rol === "gonullu" ? undefined : r.gonulluKayitIzni;
+      const li = el("li", { class: "kart" }, `${r.ders} · ${karsi} · ${tarihYaz(r.baslangic)}`
+        + (karsiIzin === undefined ? "" : ` · ${izinMetni(karsiIzin)}`));
+      if (ben.rol === "ogrenci") {
+        const b = el("button", {}, acikMi(r) ? "Görüşmeyi başlat" : "Görüşme saatinde açılır");
+        b.disabled = !acikMi(r);
+        b.onclick = () => aramaBaslat({ hedefUid: r.gonulluUid, randevuId: r.id, ders: r.ders });
+        li.append(b);
+      }
+      const takvim = el("button", { class: "ikincil" }, "Takvime ekle (hatırlatmalı)");
+      takvim.onclick = () => takvimeEkle(r);
+      li.append(takvim);
+      const iptal = el("button", { class: "ikincil" }, "Randevuyu iptal et");
+      iptal.onclick = async () => {
+        if (!confirm("Bu randevu iptal edilsin mi?")) return;
+        await updateDoc(doc(db, "randevular", r.id), { durum: "iptal", iptalEden: ben.uid });
+        mesaj("Randevu iptal edildi.");
+      };
+      li.append(iptal);
+      ul.append(li);
+    });
+    if (ben.rol === "ogrenci") tekrarCiz();
+  }
+  setInterval(() => {
+    hatirlatmalariKontrolEt();
+    if (ben?.rol === "gonullu") gelenleriFiltrele(); // süresi geçen aramaları listeden düşür
+    if (ben && !$("anaEkran").classList.contains("gizli")) randevulariCiz();
+  }, 30000);
+
+  // =========================================================
+  // HATIRLATMALAR: ders günü, 15 dk ve 5 dk kala (iki tarafa da)
+  // =========================================================
+  const gosterilenler = new Set();
+  function dahaOnceGosterildi(anahtar) {
+    if (gosterilenler.has(anahtar)) return true;
+    try { return (JSON.parse(localStorage.getItem("senAnlatHatirlatma") || "[]")).includes(anahtar); }
+    catch { return false; }
+  }
+  function gosterildiIsaretle(anahtar) {
+    gosterilenler.add(anahtar);
+    try {
+      const liste = JSON.parse(localStorage.getItem("senAnlatHatirlatma") || "[]");
+      liste.push(anahtar);
+      localStorage.setItem("senAnlatHatirlatma", JSON.stringify(liste.slice(-200)));
+    } catch {}
+  }
+
+  const konuAdi = (r) => r.ders === OKUMA ? "metin okuma" : r.ders + " dersi";
+  const karsiAdi = (r) => ben.rol === "gonullu" ? r.ogrenciAd : r.gonulluAd;
+
+  function hatirlatmalariKontrolEt() {
+    if (!ben) return;
+    const simdi = Date.now(), bugun = new Date().toDateString();
+    randevularim.filter(r => r.durum === "aktif" && r.baslangic > simdi).forEach(r => {
+      const kalan = r.baslangic - simdi;
+      const saat = saatYaz(new Date(r.baslangic));
+      if (new Date(r.baslangic).toDateString() === bugun) {
+        hatirlat(`${r.id}-gun`, "Bugün dersin var",
+          `Bugün saat ${saat}'te ${karsiAdi(r)} ile ${konuAdi(r)} randevun var.`);
+      }
+      if (kalan <= 15 * 60000 && kalan > 5 * 60000) {
+        hatirlat(`${r.id}-15`, "15 dakika kaldı",
+          `${karsiAdi(r)} ile ${konuAdi(r)} randevuna 15 dakika kaldı. Hazır mısın?`);
+      }
+      if (kalan <= 5 * 60000) {
+        hatirlat(`${r.id}-5`, "5 dakika kaldı",
+          `${konuAdi(r)} randevun 5 dakika sonra başlıyor. Derse hazır mısın?`
+          + (ben.rol === "ogrenci" ? " Ana ekrandaki Görüşmeyi başlat butonuna basabilirsin."
+                                   : " Öğrencinin araması birazdan gelecek, uygulamayı açık tut."));
+      }
+    });
+  }
+
+  function hatirlat(anahtar, baslik, metin) {
+    if (dahaOnceGosterildi(anahtar)) return;
+    gosterildiIsaretle(anahtar);
+    $("hatirlatma").textContent = metin;       // ekranda ve ekran okuyucuda
+    $("hatirlatma").classList.remove("gizli");
+    mesaj(metin);
+    bip();
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+    bildir("Sen Anlat: " + baslik, metin, anahtar); // telefon/bilgisayar bildirimi
+  }
+
+  // Randevuyu telefonun takvimine üç hatırlatmayla ekler (.ics dosyası)
+  function takvimeEkle(r, sessiz = false) {
+    const bas = new Date(r.baslangic), bit = new Date(r.baslangic + SAAT_MS);
+    const utc = (t) => t.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const kacis = (s) => String(s).replace(/([,;\\])/g, "\\$1");
+    const sabah = new Date(bas); sabah.setHours(8, 0, 0, 0);              // ders günü sabah 08:00
+    const sabahDk = Math.max(Math.round((bas - sabah) / 60000), 30);
+    const alarm = (dk, metin) => ["BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${kacis(metin)}`, `TRIGGER:-PT${dk}M`, "END:VALARM"];
+    const baslik = `Sen Anlat: ${r.ders} · ${karsiAdi(r)}`;
+    const satirlar = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Sen Anlat//SAU//TR", "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      `UID:${r.id}@sen-anlat`, `DTSTAMP:${utc(new Date())}`,
+      `DTSTART:${utc(bas)}`, `DTEND:${utc(bit)}`,
+      `SUMMARY:${kacis(baslik)}`,
+      `DESCRIPTION:${kacis("Görüşmeyi uygulamadan başlatın: " + location.origin)}`,
+      `URL:${location.origin}`,
+      ...alarm(15, "Dersine 15 dakika kaldı. Hazır mısın?"),
+      ...alarm(5, "Dersine 5 dakika kaldı. Derse hazır mısın?"),
+      ...alarm(sabahDk, `Bugün saat ${saatYaz(bas)}'te ${konuAdi(r)} randevun var.`),
+      "END:VEVENT", "END:VCALENDAR"
+    ];
+    const blob = new Blob([satirlar.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+    const a = el("a", { href: URL.createObjectURL(blob), download: "sen-anlat-randevu.ics" });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    if (!sessiz) mesaj("Takvim dosyası indirildi. Açınca randevu takvimine hatırlatmalarıyla eklenir.");
+  }
+
+  // ---------- Aynı kişiyle devam: tek buton, gerekirse seçim listesi ----------
+  let devamListesi = [];
+  function tekrarCiz() {
+    const gorulen = new Map();
+    [...randevularim].sort((a, b) => b.baslangic - a.baslangic).forEach(r => {
+      const k = r.gonulluUid + "|" + r.ders;
+      if (!gorulen.has(k)) gorulen.set(k, r);
+    });
+    devamListesi = [...gorulen.values()].slice(0, 5);
+    $("devamBtn").classList.toggle("gizli", !devamListesi.length);
+  }
+  $("devamBtn").onclick = () => {
+    const konuAdi_ = (r) => r.ders === OKUMA ? "metin okuma" : r.ders;
+    if (devamListesi.length === 1) {
+      const r = devamListesi[0];
+      return saatleriGoster({ uid: r.gonulluUid, adSoyad: r.gonulluAd }, r.ders);
+    }
+    const k = randevuEkraniAc("Kiminle devam etmek istiyorsun?", anaPaneliGoster);
+    const ul = el("ul");
+    devamListesi.forEach(r => {
+      const b = el("button", { class: "ikincil" }, `${r.gonulluAd} · ${konuAdi_(r)}`);
+      b.onclick = () => saatleriGoster({ uid: r.gonulluUid, adSoyad: r.gonulluAd }, r.ders);
+      ul.append(el("li", {}, b));
+    });
+    k.append(ul);
+  };
+
+  // =========================================================
+  // RANDEVU ALMA: ders → gönüllü → saat
+  // =========================================================
+  let geriFn = null;
+  $("randevuGeri").onclick = () => (geriFn ? geriFn() : anaPaneliGoster());
+  $("yeniRandevuBtn").onclick = () => dersSecAdimi();
+  $("okumaRandevuBtn").onclick = () => gonulluSecAdimi(OKUMA);
+
+  function randevuEkraniAc(baslik, geri) {
+    $("randevuBaslik").textContent = baslik;
+    geriFn = geri;
+    $("randevuIcerik").innerHTML = "";
+    goster("randevuEkrani");
+    return $("randevuIcerik");
+  }
+
+  function dersSecAdimi() {
+    const k = randevuEkraniAc("Hangi ders için randevu almak istiyorsun?", anaPaneliGoster);
+    // Önce kendi dersleri, sonra bölüm ve genel ders listesi
+    const havuzListe = [...new Set([...ben.dersler, ...bolumDersleri(ben.bolum).flatMap(g => g.dersler), ...oneriHavuzu()])];
+    dersAramaKur(k, {
+      id: "randevuDersAra", etiket: "Ders adını yaz ya da sesle söyle",
+      havuz: () => havuzListe,
+      secildi: (d) => d && gonulluSecAdimi(havuzListe.find(x => dersNorm(x) === dersNorm(d)) || DersEslestirme.enYakin(d, havuzListe) || d),
+      serbestMetin: (y) => `"${y}" dersi için gönüllü ara`,
+      sesliIpucu: "seçmek"
+    });
+    k.append(el("p", { class: "bos" }, "Dersi seçince o dersi anlatan gönüllüler listelenir."));
+  }
+
+  async function gonulluSecAdimi(ders) {
+    const okuma = ders === OKUMA;
+    const k = randevuEkraniAc(okuma ? "Metin okuma: kimden destek almak istersin?" : `${ders}: kimden ders almak istersin?`,
+                              okuma ? anaPaneliGoster : dersSecAdimi);
+    k.append(el("p", {}, "Gönüllüler yükleniyor..."));
+    let liste;
+    if (okuma) {
+      // Okuyucular bölüm ve sınıf fark etmeksizin listelenir
+      const snap = await getDocs(query(collection(db, "kullanicilar"), where("rol", "==", "gonullu")));
+      liste = snap.docs.map(d => ({ uid: d.id, musaitlik: [], dersler: [], ...d.data() }))
+        .filter(g => g.okuyucu && g.uid !== ben.uid);
+    } else {
+      // Bölümdeki herkesi çekip ders adını sadeleştirerek karşılaştırıyoruz,
+      // böylece elle yazılan dersler de yazım farkına takılmadan eşleşir
+      const snap = await getDocs(query(collection(db, "kullanicilar"), where("rol", "==", "gonullu")));
+      // Bölüm ve sınıf fark etmez, dersi anlatabilen tüm gönüllüler. Ders adı farklı yazılmış ya da
+      // aynı içerikli başka adla kaydedilmiş olsa da eşleşir (Kalkülüs I ≡ Matematik I)
+      liste = snap.docs.map(d => ({ uid: d.id, musaitlik: [], dersler: [], ...d.data() }))
+        .filter(g => g.rol === "gonullu" && g.uid !== ben.uid
+                  && g.dersler.some(x => DersEslestirme.ayniDers(x, ders)))
+        .map(g => ({ ...g, kayitliAd: g.dersler.find(x => dersNorm(x) === dersNorm(ders)) ? null
+                                      : g.dersler.find(x => DersEslestirme.ayniDers(x, ders)) }));
+    }
+    k.innerHTML = "";
+    if (!liste.length) {
+      k.append(el("p", {}, okuma ? "Henüz metin okuma gönüllüsü yok. Ana ekrandaki anlık arama ile şansını deneyebilirsin."
+                                 : "Bu dersi anlatan gönüllü henüz yok. Ana ekrandaki anlık arama ile şansını deneyebilirsin."));
+      return;
+    }
+    // Puanları getir, en yüksek puanlı anlatıcılar üstte
+    const puanlar = await puanlariGetir(liste.map(g => g.uid));
+    liste.sort((a, b) => (puanlar[b.uid]?.ort || 0) - (puanlar[a.uid]?.ort || 0) || (puanlar[b.uid]?.sayi || 0) - (puanlar[a.uid]?.sayi || 0));
+    const ul = el("ul");
+    liste.forEach(g => {
+      const kim = g.adSoyad;
+      const p = puanlar[g.uid];
+      const puan = p ? ` · ${p.ort.toFixed(1)} yıldız (${p.sayi} değerlendirme)` : " · henüz puan yok";
+      const li = el("li", { class: "kart" }, `${kim}${puan}${g.kayitliAd ? ` · bu dersi "${g.kayitliAd}" adıyla anlatıyor` : ""} · haftada ${g.musaitlik.length} saat müsait · ${izinMetni(g.kayitIzni)}`);
+      const b = el("button", {}, "Müsait saatlerini gör");
+      b.onclick = () => saatleriGoster(g, ders);
+      li.append(b);
+      ul.append(li);
+    });
+    k.append(ul);
+  }
+
+  async function saatleriGoster(gonullu, ders) {
+    const k = randevuEkraniAc(`${gonullu.adSoyad} · ${ders}`, () => gonulluSecAdimi(ders));
+    k.append(el("p", {}, "Saatler yükleniyor..."));
+    const gSnap = await getDoc(doc(db, "kullanicilar", gonullu.uid));
+    const g = { uid: gonullu.uid, musaitlik: [], ...gSnap.data() };
+    const rSnap = await getDocs(query(collection(db, "randevular"), where("gonulluUid", "==", g.uid)));
+    const dolu = new Set(rSnap.docs.map(d => d.data()).filter(r => r.durum === "aktif").map(r => r.baslangic));
+    randevularim.filter(r => r.durum === "aktif").forEach(r => dolu.add(r.baslangic)); // öğrencinin kendi dolu saatleri
+    const slotlar = yaklasanSlotlar(g.musaitlik, dolu);
+    k.innerHTML = "";
+    if (!slotlar.length) {
+      k.append(el("p", {}, "Önümüzdeki 7 günde boş saat yok. Başka bir gönüllü seçebilirsin."));
+      return;
+    }
+    k.append(el("p", {}, `Bir saat seç. Her randevu bir saat sürer. ${g.adSoyad} ${izinMetni(g.kayitIzni)}.`));
+    let sonGun = "", ul;
+    slotlar.forEach(t => {
+      const gunAd = t.toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
+      if (gunAd !== sonGun) {
+        k.append(el("h3", {}, gunAd));
+        ul = el("ul", { class: "slotlar" });
+        k.append(ul);
+        sonGun = gunAd;
+      }
+      const b = el("button", { class: "ikincil", "aria-label": `${gunAd} saat ${saatYaz(t)}` }, saatYaz(t));
+      b.onclick = () => randevuOlustur(g, ders, t);
+      ul.append(el("li", {}, b));
+    });
+  }
+
+  async function randevuOlustur(g, ders, t) {
+    if (!confirm(`${g.adSoyad} ile ${tarihYaz(t.getTime())} için ${ders} randevusu oluşturulsun mu?`)) return;
+    // Belge kimliği gönüllü + saat: aynı saate iki randevu yazılamaz
+    const ref = doc(db, "randevular", `${g.uid}_${t.getTime()}`);
+    try {
+      await runTransaction(db, async (tx) => {
+        const s = await tx.get(ref);
+        if (s.exists() && s.data().durum === "aktif") throw new Error("dolu");
+        tx.set(ref, {
+          ogrenciUid: ben.uid, ogrenciAd: ben.adSoyad,
+          gonulluUid: g.uid, gonulluAd: g.adSoyad,
+          gonulluKayitIzni: !!g.kayitIzni,
+          ders,
+          baslangic: t.getTime(),
+          durum: "aktif",
+          olusturma: serverTimestamp()
+        });
+      });
+      anaPaneliGoster();
+      takvimeEkle({ id: ref.id, ders, baslangic: t.getTime(), gonulluAd: g.adSoyad, ogrenciAd: ben.adSoyad }, true);
+      mesaj(`Randevun oluşturuldu: ${tarihYaz(t.getTime())}, ${g.adSoyad}. Takvim dosyası indirildi, açınca randevu hatırlatmalarıyla takvimine eklenir.`);
+    } catch {
+      mesaj("Bu saat az önce doldu, lütfen başka bir saat seç.");
+      saatleriGoster(g, ders);
+    }
+  }
+
+  // =========================================================
+  // PROFİL: dersler ve müsaitlik
+  // =========================================================
+  async function bolumDersleriniOgren() {
+    if (kullaniciDersleri.size) return;
+    try {
+      const snap = await getDocs(query(collection(db, "kullanicilar"), where("rol", "==", "gonullu")));
+      snap.docs.forEach(d => (d.data().dersler || []).forEach(x => kullaniciDersleri.add(x)));
+    } catch {}
+  }
+
+  function profilAc() {
+    bolumDersleriniOgren();
+    const gonullu = ben.rol === "gonullu";
+    $("profilBaslik").textContent = gonullu ? "Derslerim ve saatlerim" : "Derslerim";
+    dersSeciciCiz($("profilDersler"), ben.bolum, ben.sinif, ben.rol, ben.dersler, async (dersler) => {
+      try {
+        await updateDoc(doc(db, "kullanicilar", ben.uid), { dersler });
+        ben.dersler = dersler;
+      } catch (err) { mesaj("Ders kaydedilemedi: " + (err.code || err.message), true); }
+    });
+    $("profilOkuyucuKutu").classList.toggle("gizli", !gonullu);
+    $("profilOkuyucu").checked = !!ben.okuyucu;
+    $("profilKayitIzni").checked = !!ben.kayitIzni;
+    $("profilKayitIzniKutu").classList.toggle("gizli", !gonullu);
+    $("profilMusaitlikKutu").classList.toggle("gizli", !gonullu);
+    if (gonullu) musaitlikCiz($("profilMusaitlik"), ben.musaitlik);
+    goster("profilEkrani");
+  }
+  $("profilBtn").onclick = profilAc;
+  $("profilGeri").onclick = anaPaneliGoster;
+  $("profilKaydet").onclick = async () => {
+    const veri = { dersler: seciliDersleriOku($("profilDersler")) };
+    if (ben.rol === "gonullu") {
+      veri.kayitIzni = $("profilKayitIzni").checked;
+      veri.musaitlik = [...$("profilMusaitlik").querySelectorAll("input:checked")].map(c => c.value);
+      veri.okuyucu = $("profilOkuyucu").checked;
+    }
+    try { await updateDoc(doc(db, "kullanicilar", ben.uid), veri); }
+    catch (err) { mesaj("Kaydedilemedi: " + (err.code || err.message), true); return; }
+    Object.assign(ben, veri);
+    anaBilgiGuncelle();
+    if (ben.rol === "gonullu") gelenleriDinle(); // okuyucu durumu değiştiyse dinlemeyi yenile
+    anaPaneliGoster();
+    mesaj("Kaydedildi.");
+  };
+
+  // =========================================================
+  // SES: zil, titreşim, bildirim
+  // =========================================================
+  let sesCtx = null, zilZamanlayici = null;
+  function sesBaslat() {
+    if (!sesCtx) sesCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Hatırlatmalar için hem öğrenciden hem gönüllüden bildirim izni istenir
+    if (ben && "Notification" in window && Notification.permission === "default") Notification.requestPermission();
+  }
+
+  // Android Chrome bildirimleri sw.js üzerinden gösterir
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+  async function bildir(baslik, govde, etiket) {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    try {
+      const kayit = await navigator.serviceWorker?.getRegistration();
+      if (kayit) await kayit.showNotification(baslik, { body: govde, tag: etiket });
+      else new Notification(baslik, { body: govde, tag: etiket });
+    } catch (err) { console.warn("Bildirim gösterilemedi", err); }
+  }
+  document.addEventListener("click", sesBaslat); // tarayıcı ses için bir dokunuş bekler
+  function bip() { notalar([[880, 0.4]]); }
+
+  // Kısa ses dizisi: [frekans, süre] çiftleri art arda çalınır
+  function notalar(dizi, ses = 0.2) {
+    if (!sesCtx) return;
+    if (sesCtx.state === "suspended") sesCtx.resume().catch(() => {});
+    let t = sesCtx.currentTime;
+    for (const [frekans, sure] of dizi) {
+      if (frekans) {
+        const o = sesCtx.createOscillator(), g = sesCtx.createGain();
+        o.frequency.value = frekans;
+        g.gain.setValueAtTime(ses, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + sure);
+        o.connect(g).connect(sesCtx.destination);
+        o.start(t); o.stop(t + sure);
+      }
+      t += sure;
+    }
+  }
+
+  // Ekran okuyucuyu beklemeden ne olduğunu anlatan sesler ve titreşimler
+  const TONLAR = {
+    caliyor:  { n: [[440, 0.35], [0, 0.15], [440, 0.35]], v: [] },
+    baglandi: { n: [[660, 0.12], [0, 0.06], [990, 0.18]], v: [80, 60, 80] },
+    bitti:    { n: [[700, 0.18], [520, 0.18], [390, 0.3]], v: [300] },
+    hata:     { n: [[220, 0.25], [0, 0.08], [220, 0.25]], v: [200, 100, 200, 100, 200] },
+    belge:    { n: [[1046, 0.12], [1318, 0.2]], v: [60] }
+  };
+  function ton(tur) {
+    const x = TONLAR[tur];
+    if (!x) return;
+    notalar(x.n, tur === "caliyor" ? 0.12 : 0.2);
+    if (x.v.length && navigator.vibrate) navigator.vibrate(x.v);
+  }
+
+  // Öğrenci beklerken düzenli "çalıyor" sesi: aramanın sürdüğünü ekrana bakmadan anlar
+  let caliyorZamanlayici = null;
+  function caliyorBaslat() { caliyorDurdur(); ton("caliyor"); caliyorZamanlayici = setInterval(() => ton("caliyor"), 3000); }
+  function caliyorDurdur() { clearInterval(caliyorZamanlayici); caliyorZamanlayici = null; }
+  function zilCal() {
+    zilDurdur(); bip();
+    zilZamanlayici = setInterval(bip, 1500);
+    if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
+  }
+  function zilDurdur() { clearInterval(zilZamanlayici); zilZamanlayici = null; }
+  function bildirimGoster(a) {
+    if (document.hidden) bildir("Sen Anlat: yeni arama", a.ogrenciAd + (a.ders ? " · " + a.ders : ""), "arama");
+  }
+
+  // =========================================================
+  // GÖNÜLLÜ: gelen aramalar
+  // =========================================================
+  $("musaitAnahtar").addEventListener("change", async (e) => {
+    const acik = e.target.checked;
+    await updateDoc(doc(db, "kullanicilar", ben.uid), { musait: acik });
+    gelenleriFiltrele();
+    mesaj(acik ? "Anlık aramalara açıksınız." : "Anlık aramalara kapalısınız. Randevulu aramalar yine gelir.");
+  });
+
+  // İki kaynaktan arama dinlenir:
+  // doğrudan bana gelen randevulu aramalar ve (okuyucuysam) anlık okuma aramaları
+  function gelenleriDinle() {
+    gelenleriBirak();
+    if (!onayliGonullu()) return;
+    const aramalar = collection(db, "aramalar");
+    const sorgular = {
+      hedef: query(aramalar, where("hedefUid", "==", ben.uid), where("durum", "==", "bekliyor"))
+    };
+    if (ben.okuyucu) sorgular.okuma = query(aramalar, where("tur", "==", "okuma"), where("durum", "==", "bekliyor"));
+    const kaynaklar = {};
+    const durdurlar = Object.entries(sorgular).map(([ad, q]) => onSnapshot(q, (snap) => {
+      kaynaklar[ad] = snap.docs;
+      const birlesik = new Map();
+      Object.values(kaynaklar).flat().forEach(d => birlesik.set(d.id, d));
+      sonGelenDocs = [...birlesik.values()];
+      gelenleriFiltrele();
+    }));
+    gelenDinleyici = () => durdurlar.forEach(f => f());
+  }
+
+  function gelenleriFiltrele() {
+    if (!ben) return;
+    const musait = $("musaitAnahtar").checked;
+    const liste = sonGelenDocs.filter(d => {
+      const a = d.data();
+      if (a.ogrenciUid === ben.uid) return false;
+      // Yarım kalmış eski aramalar (öğrenci sayfayı kapattıysa) gösterilmez
+      const yas = Date.now() - (a.olusturma?.toMillis?.() ?? Date.now());
+      if (yas > 2 * 60 * 1000) return false;
+      // Randevulu arama: anahtar kapalı olsa da o gönüllüye düşer (saatini kendisi vermişti)
+      if (a.hedefUid && a.randevuId) return a.hedefUid === ben.uid;
+      // Bundan sonrası randevusuz: sadece "Şu an müsaitim" açıkken
+      if (!musait) return false;
+      if (a.hedefUid) return a.hedefUid === ben.uid;      // "son gönüllünü ara" ile doğrudan arama
+      // Anlık okuma: kayıt yapan okuyucu, öğrenci kabul etmediyse aramayı görmez
+      if (a.tur === "okuma") return !!ben.okuyucu && (a.kayitKabul !== false || !ben.kayitIzni);
+      return false;
+    });
+    gelenleriCiz(liste);
+    const yeni = liste.filter(d => !gorulenAramalar.has(d.id));
+    yeni.forEach(d => gorulenAramalar.add(d.id));
+    if (yeni.length) { zilCal(); bildirimGoster(yeni[0].data()); }
+    if (!liste.length) zilDurdur();
+  }
+
+  function gelenleriBirak() {
+    if (gelenDinleyici) { gelenDinleyici(); gelenDinleyici = null; }
+    sonGelenDocs = [];
+    zilDurdur();
+    gelenleriCiz([]);
+  }
+
+  function gelenleriCiz(liste) {
+    const ul = $("gelenListe");
+    ul.innerHTML = "";
+    if (!liste.length) return;
+    liste.forEach(d => {
+      const a = d.data();
+      const zaman = a.hedefUid ? "Randevulu" : "Anlık";
+      const metin = a.tur === "okuma"
+        ? `${zaman} metin okuma: ${a.ogrenciAd}`
+        : `${zaman} ders: ${a.ogrenciAd}` + (a.ders ? ` · ${a.ders}` : "");
+      const li = el("li", { class: "kart" }, metin);
+      const b = el("button", {}, "Aramayı aç");
+      b.onclick = () => kabulEt(d.id);
+      li.append(b);
+      ul.append(li);
+    });
+  }
+
+  // =========================================================
+  // SESLİ GÖRÜŞME (WebRTC, Firestore üzerinden eşleşme)
+  // =========================================================
+  // STUN: iki tarafın internetteki adresini bulur.
+  // TURN: doğrudan bağlantı kurulamazsa (mobil veri, okul ağı) sesi aktarır.
+  const ICE = { iceServers: [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+    { urls: ["turn:openrelay.metered.ca:80", "turn:openrelay.metered.ca:443",
+             "turn:openrelay.metered.ca:443?transport=tcp"],
+      username: "openrelayproject", credential: "openrelayproject" }
+  ] };
+
+  async function mikrofonAl() {
+    yerelAkis = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  }
+
+  function pcKur(kendiAdaylarim) {
+    pc = new RTCPeerConnection(ICE);
+    yerelAkis.getTracks().forEach(t => pc.addTrack(t, yerelAkis));
+    pc.ontrack = (e) => { $("uzakSes").srcObject = e.streams[0]; };
+    pc.ondatachannel = (e) => kanalKur(e.channel); // gönüllü tarafı: öğrencinin açtığı belge kanalı
+    pc.onicecandidate = (e) => { if (e.candidate) addDoc(kendiAdaylarim, e.candidate.toJSON()); };
+    pc.onconnectionstatechange = () => {
+      if (!pc) return;
+      if (pc.connectionState === "connected" && !baglantiBaslangic) {
+        sureBaslat(); caliyorDurdur(); ton("baglandi");
+        kayitKarari(); // yalnızca iki taraf da izin verdiyse kayıt
+        mesaj("Bağlantı kuruldu, konuşabilirsiniz.", true);
+        sessizMod = true; // bundan sonra sadece kritik mesajlar okunur
+      }
+      if (pc.connectionState === "failed") { ton("hata"); mesaj("Bağlantı kurulamadı. Görüşmeyi bitirip tekrar deneyin.", true); }
+    };
+  }
+
+  function karsiAdaylariDinle(koleksiyon) {
+    const bekleyen = [];
+    const ekle = async (c) => { try { await pc?.addIceCandidate(c); } catch (err) { console.warn(err); } };
+    aboneler.push(onSnapshot(koleksiyon, (snap) => {
+      snap.docChanges().forEach((ch) => {
+        if (ch.type !== "added") return;
+        const c = new RTCIceCandidate(ch.doc.data());
+        if (pc?.remoteDescription) ekle(c); else bekleyen.push(c);
+      });
+    }));
+    return () => { while (bekleyen.length) ekle(bekleyen.shift()); };
+  }
+
+  function gorusmeEkraniAc(metin) {
+    $("gorusmeDurum").textContent = metin;
+    belgeTemizle();
+    $("belgeGonderKutu").classList.toggle("gizli", ben.rol !== "ogrenci");
+    sureDurdur();
+    $("kayitGosterge").classList.add("gizli");
+    goster("gorusmeEkrani");
+  }
+
+  // =========================================================
+  // BELGE (PDF / FOTOĞRAF) AKTARIMI
+  // Dosya sunucuya yüklenmez; görüşme bağlantısındaki veri kanalından
+  // doğrudan gönüllüye gider ve görüşme bitince silinir.
+  // =========================================================
+  let kanal = null, gelenBelge = null, belgeUrl = null;
+  const PARCA = 16 * 1024, AZAMI = 25 * 1024 * 1024;
+
+  function kanalKur(k) {
+    kanal = k;
+    kanal.binaryType = "arraybuffer";
+    kanal.onopen = () => belgeDurumu(true);
+    kanal.onclose = () => belgeDurumu(false);
+    kanal.onmessage = (e) => belgeParcasiAl(e.data);
+  }
+
+  function belgeDurumu(acik) {
+    $("belgeGonderBtn").disabled = !acik;
+    $("belgeDurum").textContent = acik ? "Belge göndermeye hazır." : "Bağlantı kurulunca belge gönderebilirsin.";
+  }
+
+  function belgeTemizle() {
+    if (belgeUrl) URL.revokeObjectURL(belgeUrl);
+    belgeUrl = null; gelenBelge = null;
+    $("belgeSayfalar").innerHTML = "";
+    $("belgeGorKutu").classList.add("gizli");
+    $("belgeSec").value = "";
+    belgeDurumu(false);
+  }
+
+  $("belgeGonderBtn").onclick = async () => {
+    const dosya = $("belgeSec").files[0];
+    if (!dosya) { mesaj("Önce bir PDF ya da fotoğraf seç."); return; }
+    if (dosya.size > AZAMI) { mesaj("Dosya 25 MB'tan büyük olamaz."); return; }
+    if (!kanal || kanal.readyState !== "open") { mesaj("Bağlantı henüz hazır değil."); return; }
+    $("belgeGonderBtn").disabled = true;
+    try {
+      const veri = await dosya.arrayBuffer();
+      kanal.send(JSON.stringify({ tip: "baslangic", ad: dosya.name, tur: dosya.type, boyut: dosya.size }));
+      kanal.bufferedAmountLowThreshold = PARCA * 16;
+      let sonYuzde = -1;
+      for (let i = 0; i < veri.byteLength; i += PARCA) {
+        if (kanal.bufferedAmount > PARCA * 64) {
+          await new Promise(r => { kanal.onbufferedamountlow = () => { kanal.onbufferedamountlow = null; r(); }; });
+        }
+        kanal.send(veri.slice(i, i + PARCA));
+        const yuzde = Math.floor(((i + PARCA) / veri.byteLength) * 10) * 10;
+        if (yuzde !== sonYuzde) { $("belgeDurum").textContent = `Gönderiliyor: %${Math.min(yuzde, 100)}`; sonYuzde = yuzde; }
+      }
+      kanal.send(JSON.stringify({ tip: "bitti" }));
+      $("belgeDurum").textContent = "Belge gönderildi. Başka bir belge de gönderebilirsin.";
+      mesaj(`${dosya.name} gönüllüye gönderildi.`, true);
+    } catch (err) {
+      mesaj("Belge gönderilemedi: " + err.message);
+    } finally {
+      $("belgeGonderBtn").disabled = !(kanal && kanal.readyState === "open");
+    }
+  };
+
+  function belgeParcasiAl(veri) {
+    if (typeof veri === "string") {
+      const m = JSON.parse(veri);
+      if (m.tip === "baslangic") {
+        gelenBelge = { ...m, parcalar: [], alinan: 0 };
+        $("belgeGorKutu").classList.remove("gizli");
+        $("belgeBilgi").textContent = `${m.ad} alınıyor...`;
+        $("belgeSayfalar").innerHTML = "";
+      } else if (m.tip === "bitti" && gelenBelge) {
+        const blob = new Blob(gelenBelge.parcalar, { type: gelenBelge.tur || "application/pdf" });
+        belgeGoster(blob, gelenBelge.ad);
+        gelenBelge = null;
+      }
+      return;
+    }
+    if (!gelenBelge) return;
+    gelenBelge.parcalar.push(veri);
+    gelenBelge.alinan += veri.byteLength;
+    $("belgeBilgi").textContent = `${gelenBelge.ad} alınıyor: %${Math.floor(gelenBelge.alinan / gelenBelge.boyut * 100)}`;
+  }
+
+  async function belgeGoster(blob, ad) {
+    if (belgeUrl) URL.revokeObjectURL(belgeUrl);
+    belgeUrl = URL.createObjectURL(blob);
+    $("belgeAc").href = belgeUrl;
+    $("belgeBilgi").textContent = ad;
+    ton("belge");
+    mesaj(`Öğrenci bir belge gönderdi: ${ad}`, true);
+    const kutu = $("belgeSayfalar");
+    kutu.innerHTML = "";
+    if (blob.type.startsWith("image/")) {
+      kutu.append(el("img", { src: belgeUrl, alt: "Öğrencinin gönderdiği fotoğraf: " + ad }));
+      return;
+    }
+    try {
+      // PDF.js ile sayfaları resim olarak çiziyoruz: telefonda da her sayfa görünür
+      const lib = await pdfjsYukle();
+      const pdf = await lib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()) }).promise;
+      for (let n = 1; n <= pdf.numPages; n++) {
+        const sayfa = await pdf.getPage(n);
+        const genislik = sayfa.getViewport({ scale: 1 }).width;
+        const olcek = ((kutu.clientWidth || 480) / genislik) * Math.min(window.devicePixelRatio || 1, 2);
+        const vp = sayfa.getViewport({ scale: olcek });
+        const tuval = el("canvas", { "aria-label": `Sayfa ${n}` });
+        tuval.width = vp.width; tuval.height = vp.height;
+        kutu.append(el("h4", {}, `Sayfa ${n} / ${pdf.numPages}`), tuval);
+        await sayfa.render({ canvasContext: tuval.getContext("2d"), viewport: vp }).promise;
+      }
+    } catch (err) {
+      console.warn("PDF.js açılamadı, tarayıcı görüntüleyicisine geçiliyor", err);
+      kutu.innerHTML = "";
+      kutu.append(el("iframe", { src: belgeUrl, title: "Gelen belge: " + ad }));
+    }
+  }
+
+  let pdfjsSozu = null;
+  function pdfjsYukle() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (!pdfjsSozu) pdfjsSozu = new Promise((tamam, hata) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      s.onload = () => {
+        window.pdfjsLib = window.pdfjsLib || window["pdfjs-dist/build/pdf"];
+        if (!window.pdfjsLib) { hata(new Error("pdfjsLib yok")); return; }
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+        tamam(window.pdfjsLib);
+      };
+      s.onerror = () => { pdfjsSozu = null; hata(new Error("PDF.js yüklenemedi")); };
+      document.head.append(s);
+    });
+    return pdfjsSozu;
+  }
+
+  let aktifGorusme = null; // öğrencinin bağlandığı görüşme (değerlendirme için)
+
+  function gorusmeyiKapat(m) {
+    // Bağlantı gerçekten kurulduysa öğrenci ders sonunda anlatıcıyı değerlendirir
+    const degerlendirilecek = ben?.rol === "ogrenci" && baglantiBaslangic && aktifGorusme ? { ...aktifGorusme } : null;
+    if (baglantiBaslangic) ton("bitti");
+    aktifGorusme = null;
+    sessizMod = false;
+    caliyorDurdur();
+    clearTimeout(cevapsizZamanlayici);
+    $("gorusmeBilgi").textContent = "";
+    kayitBitir(); // kayıt açıksa durdurulur ve cihaza kaydedilir
+    sureDurdur();
+    if (kanal) { try { kanal.close(); } catch {} kanal = null; }
+    belgeTemizle();
+    aboneler.forEach(f => f()); aboneler = [];
+    if (pc) { pc.close(); pc = null; }
+    if (yerelAkis) { yerelAkis.getTracks().forEach(t => t.stop()); yerelAkis = null; }
+    aktifAramaId = null;
+    $("uzakSes").srcObject = null;
+    if (degerlendirilecek) degerlendirmeAc(degerlendirilecek);
+    else anaPaneliGoster();
+    if (m) mesaj(m);
+  }
+
+  $("kapatBtn").onclick = async () => {
+    const id = aktifAramaId, sureSn = gecenSure();
+    gorusmeyiKapat(`Görüşme sonlandırıldı. Süre: ${sureYaz(sureSn)}.`);
+    if (id) { try { await updateDoc(doc(db, "aramalar", id), { durum: "bitti", bitis: serverTimestamp(), sureSn }); } catch {} }
+  };
+
+  // =========================================================
+  // GÖRÜŞME SÜRESİ
+  // =========================================================
+  let baglantiBaslangic = null, sureZamanlayici = null;
+  const sureYaz = (sn) => sn >= 3600
+    ? `${Math.floor(sn / 3600)}:${iki(Math.floor(sn % 3600 / 60))}:${iki(sn % 60)}`
+    : `${iki(Math.floor(sn / 60))}:${iki(sn % 60)}`;
+  const gecenSure = () => baglantiBaslangic ? Math.round((Date.now() - baglantiBaslangic) / 1000) : 0;
+
+  function sureBaslat() {
+    if (baglantiBaslangic) return;
+    baglantiBaslangic = Date.now();
+    sureZamanlayici = setInterval(() => { $("gorusmeSure").textContent = sureYaz(gecenSure()); }, 1000);
+  }
+  function sureDurdur() {
+    clearInterval(sureZamanlayici); sureZamanlayici = null; baglantiBaslangic = null;
+    $("gorusmeSure").textContent = "00:00";
+  }
+
+  // =========================================================
+  // SESLİ KAYIT: her görüşme iki tarafın kendi cihazında kaydedilir.
+  // Kullanıcılar kayıt olurken açık rıza verir; görüşme ekranında kayıt göstergesi her zaman görünür.
+  // =========================================================
+  let kaydedici = null, kayitDurumu = { karsi: false, karsiAd: "" };
+  const KAYIT_SAKLAMA_GUN = 90;
+
+  function kayitKarari() {
+    const g = $("kayitGosterge");
+    // Kayda gönüllü karar verir; öğrenci bunu görerek görüşmeye katılır
+    const kaydet = ben?.rol === "gonullu" ? !!ben.kayitIzni : kayitDurumu.karsi;
+    if (kaydet) {
+      kayitBaslat();
+      g.textContent = "● Bu görüşme kaydediliyor. Kayıt yalnızca kendi cihazında saklanır ve 90 gün sonra silinir.";
+    } else {
+      g.textContent = "Bu görüşme kaydedilmiyor: " + (ben?.rol === "gonullu" ? "kayıt iznin kapalı." : `${kayitDurumu.karsiAd || "gönüllü"} kayda izin vermiyor.`);
+    }
+    g.classList.remove("gizli");
+  }
+
+  function kayitBaslat() {
+    const id = aktifAramaId;
+    try {
+      // İki tarafın sesi tek kayıtta birleştirilir
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const hedef = ctx.createMediaStreamDestination();
+      if (yerelAkis) ctx.createMediaStreamSource(yerelAkis).connect(hedef);
+      const uzak = $("uzakSes").srcObject;
+      if (uzak) ctx.createMediaStreamSource(uzak).connect(hedef);
+      const tur = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find(t => window.MediaRecorder?.isTypeSupported?.(t));
+      const rec = new MediaRecorder(hedef.stream, tur ? { mimeType: tur } : undefined);
+      const parcalar = [];
+      rec.ondataavailable = (e) => { if (e.data.size) parcalar.push(e.data); };
+      rec.onstop = async () => {
+        try { ctx.close(); } catch {}
+        const blob = new Blob(parcalar, { type: rec.mimeType || "audio/webm" });
+        if (!blob.size || !id) return;
+        try {
+          await kayitKaydet(id, blob);
+          mesaj("Görüşme kaydı cihazına kaydedildi. Geçmiş derslerim bölümünden dinleyebilirsin.");
+          // ders değerlendirmesi ekranı açıksa mesaj onu bölmesin diye kısa tutulur
+        } catch (err) { mesaj("Kayıt saklanamadı: " + err.message); }
+      };
+      rec.start(1000);
+      kaydedici = rec;
+    } catch (err) {
+      kaydedici = null;
+      console.warn("Kayıt başlatılamadı", err);
+    }
+  }
+
+  function kayitBitir() {
+    if (kaydedici && kaydedici.state !== "inactive") kaydedici.stop();
+    kaydedici = null;
+    $("kayitGosterge").classList.add("gizli");
+    kayitDurumu = { karsi: false, karsiAd: "" };
+  }
+
+  // Kayıtlar tarayıcının kendi veritabanında (IndexedDB) saklanır, sunucuya gitmez
+  function yerelVt() {
+    return new Promise((tamam, hata) => {
+      const r = indexedDB.open("senAnlat", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("kayitlar");
+      r.onsuccess = () => tamam(r.result);
+      r.onerror = () => hata(r.error);
+    });
+  }
+  async function kayitIslem(mod, fn) {
+    const vt = await yerelVt();
+    return new Promise((tamam, hata) => {
+      const tx = vt.transaction("kayitlar", mod);
+      const istek = fn(tx.objectStore("kayitlar"));
+      tx.oncomplete = () => tamam(istek?.result);
+      tx.onerror = () => hata(tx.error);
+    });
+  }
+  const kayitKaydet = (id, blob) => kayitIslem("readwrite", st => st.put({ blob, tarih: Date.now() }, id));
+  const kayitGetir = (id) => kayitIslem("readonly", st => st.get(id));
+  const kayitSil = (id) => kayitIslem("readwrite", st => st.delete(id));
+  // Saklama süresi dolan kayıtları cihazdan siler (aydınlatma metninde belirtilen süre)
+  async function eskiKayitlariTemizle() {
+    try {
+      const vt = await yerelVt();
+      const sinir = Date.now() - KAYIT_SAKLAMA_GUN * 86400000;
+      const tx = vt.transaction("kayitlar", "readwrite");
+      tx.objectStore("kayitlar").openCursor().onsuccess = (e) => {
+        const c = e.target.result;
+        if (!c) return;
+        if ((c.value?.tarih || 0) < sinir) c.delete();
+        c.continue();
+      };
+    } catch {}
+  }
+
+  // =========================================================
+  // YARDIM SEÇENEKLERİ (öğrenci ana ekranındaki tek buton)
+  // =========================================================
+  $("yardimBtn").onclick = () => goster("yardimEkrani");
+  $("yardimGeri").onclick = anaPaneliGoster;
+
+  // ---------- Görünüm: büyük yazı ve yüksek kontrast (bu cihazda hatırlanır) ----------
+  function gorunumUygula() {
+    let ayar = {};
+    try { ayar = JSON.parse(localStorage.getItem("senAnlatGorunum") || "{}"); } catch {}
+    document.documentElement.classList.toggle("buyukYazi", !!ayar.buyuk);
+    document.documentElement.classList.toggle("yuksekKontrast", !!ayar.kontrast);
+    $("buyukYaziAnahtar").checked = !!ayar.buyuk;
+    $("kontrastAnahtar").checked = !!ayar.kontrast;
+  }
+  function gorunumKaydet() {
+    const ayar = { buyuk: $("buyukYaziAnahtar").checked, kontrast: $("kontrastAnahtar").checked };
+    try { localStorage.setItem("senAnlatGorunum", JSON.stringify(ayar)); } catch {}
+    gorunumUygula();
+  }
+  $("gorunumBtn").onclick = () => {
+    const acik = $("gorunumPanel").classList.toggle("gizli") === false;
+    $("gorunumBtn").setAttribute("aria-expanded", String(acik));
+    if (acik) $("buyukYaziAnahtar").focus();
+  };
+  $("buyukYaziAnahtar").addEventListener("change", () => { gorunumKaydet(); mesaj($("buyukYaziAnahtar").checked ? "Büyük yazı açık." : "Büyük yazı kapalı."); });
+  $("kontrastAnahtar").addEventListener("change", () => { gorunumKaydet(); mesaj($("kontrastAnahtar").checked ? "Yüksek kontrast açık." : "Yüksek kontrast kapalı."); });
+  gorunumUygula();
+
+  // ---------- Nasıl kullanılır? ----------
+  $("rehberBtn").onclick = () => {
+    if (aktifEkran !== "rehberEkrani") rehberOncesi = aktifEkran;
+    goster("rehberEkrani");
+  };
+  $("rehberGeri").onclick = () => {
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    if (rehberOncesi === "anaEkran" && ben) anaPaneliGoster();
+    else goster(rehberOncesi || (ben ? "anaEkran" : "kayitBolumu"));
+  };
+  $("rehberDinleBtn").onclick = () => {
+    if (!window.speechSynthesis) { mesaj("Bu tarayıcı sesli okumayı desteklemiyor. Ekran okuyucunla rehberi okuyabilirsin."); return; }
+    if (speechSynthesis.speaking) { speechSynthesis.cancel(); $("rehberDinleBtn").textContent = "Rehberi sesli dinle"; return; }
+    const metin = $("rehberMetni").innerText;
+    const konusma = new SpeechSynthesisUtterance(metin);
+    konusma.lang = "tr-TR";
+    const tr = speechSynthesis.getVoices().find(v => v.lang?.toLowerCase().startsWith("tr"));
+    if (tr) konusma.voice = tr;
+    konusma.rate = 0.95;
+    konusma.onend = () => { $("rehberDinleBtn").textContent = "Rehberi sesli dinle"; };
+    speechSynthesis.speak(konusma);
+    $("rehberDinleBtn").textContent = "Sesli okumayı durdur";
+  };
+
+  // =========================================================
+  // YAPAY ZEKÂ İLE METİN OKUMA (Antalia-2 Mini, cihazda çalışır)
+  // Sözel içerik yapay zekâya, işlemli/sayısal içerik gönüllüye yönlendirilir.
+  // =========================================================
+
+  // İşlem işareti yoğunluğu ve denklem satırları. Rakamlar tek başına sayılmaz:
+  // tarih, hukuk, iktisat metinlerinde yıl, madde ve oran gibi çok rakam bulunur.
+  function islemAnalizi(metin) {
+    const dolu = metin.replace(/\s+/g, "");
+    if (!dolu.length) return { islemli: false };
+    const isaret = (dolu.match(/[=+×÷*^<>≤≥≠±∑∏∫√∞πθαβγδλμσφΔ∂≈∈∀∃→⇒∪∩⊂]/g) || []).length;
+    const rakam = (dolu.match(/[0-9]/g) || []).length;
+    const satirlar = metin.split(/\n+/).map(x => x.trim()).filter(x => x.length > 2);
+    const denklem = satirlar.filter(x => /[=<>≤≥≈]/.test(x) && (/[0-9a-zA-Z)]\s*[+\-−×÷*/^]\s*[0-9a-zA-Z(]/.test(x) || /[∑∫√]|\^/.test(x))).length;
+    const isaretOrani = isaret / dolu.length, rakamOrani = rakam / dolu.length;
+    const denklemOrani = satirlar.length ? denklem / satirlar.length : 0;
+    return { isaretOrani, rakamOrani, denklemOrani,
+             islemli: isaretOrani > 0.03 || denklemOrani > 0.15 };
+  }
+
+  const scriptYukle = (src) => new Promise((tamam, hata) => {
+    if ([...document.scripts].some(x => x.src.endsWith(src))) return tamam();
+    const el_ = document.createElement("script");
+    el_.src = src; el_.onload = tamam; el_.onerror = () => hata(new Error(src + " yüklenemedi"));
+    document.head.append(el_);
+  });
+  async function aiMotorunuYukle() {
+    await scriptYukle("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.min.js");
+    await scriptYukle("normalize.js");
+    await scriptYukle("audio.js");
+    await scriptYukle("ai-okuma.js");
+    let son = -1;
+    await window.AiOkuma.yukle((yuzde) => {
+      if (yuzde === son) return; son = yuzde;
+      $("aiIlerleme").textContent = `Yapay zekâ modeli hazırlanıyor: %${yuzde}`;
+    });
+  }
+
+  async function pdfAc(dosya) {
+    const lib = await pdfjsYukle();
+    return lib.getDocument({ data: new Uint8Array(await dosya.arrayBuffer()) }).promise;
+  }
+  async function pdfMetniCikar(dosya, baslangicSayfa, bitisSayfa) {
+    const pdf = await pdfAc(dosya);
+    const bit = Math.min(Math.max(1, bitisSayfa || pdf.numPages), pdf.numPages);
+    let metin = "";
+    for (let n = Math.min(Math.max(1, baslangicSayfa), bit); n <= bit; n++) {
+      const icerik = await (await pdf.getPage(n)).getTextContent();
+      metin += icerik.items.map(it => it.str + (it.hasEOL ? "\n" : "")).join("") + "\n";
+    }
+    return { metin: metin.replace(/-\n(?=\p{Ll})/gu, ""), sayfaSayisi: pdf.numPages };
+  }
+
+  let aiMetin = "", aiOkumaNo = 0, aiCtx = null;
+  let aiKaynaklar = [];   // zamanlanmış sesler: { sira, basla, bitis, kaynak }
+  let aiSesParcalari = []; // indirme için, parça sırasına göre son üretilen sesler
+  const aiHiz = () => Number(document.querySelector('input[name="aiHiz"]:checked')?.value) || 0.95;
+
+  $("aiOkumaBtn").onclick = () => {
+    $("aiYonlendirme").classList.add("gizli");
+    goster("aiOkumaEkrani");
+  };
+
+  // PDF seçilince sayfa sayısını göster, bitiş sayfasını son sayfaya ayarla
+  $("aiPdf").addEventListener("change", async () => {
+    const dosya = $("aiPdf").files[0];
+    $("aiSayfaBilgi").textContent = "";
+    if (!dosya) return;
+    try {
+      const n = (await pdfAc(dosya)).numPages;
+      $("aiBaslangic").max = n; $("aiBitis").max = n;
+      $("aiBaslangic").value = 1; $("aiBitis").value = n;
+      $("aiSayfaBilgi").textContent = `Bu PDF ${n} sayfa.`;
+      mesaj(`PDF seçildi, ${n} sayfa.`);
+    } catch { $("aiSayfaBilgi").textContent = "PDF açılamadı."; }
+  });
+
+  // Okurken hız değişirse: o an okunan cümleden itibaren yeni hızla devam et
+  document.querySelectorAll('input[name="aiHiz"]').forEach(r => r.addEventListener("change", () => {
+    if (!aiCtx || aiCtx.state === "closed" || !aiKaynaklar.length) return;
+    const simdi = aiCtx.currentTime;
+    const suanki = aiKaynaklar.find(x => x.bitis > simdi);
+    if (!suanki) return; // her şey okunduysa yapılacak bir şey yok
+    aiOku(suanki.sira - 1, true);
+  }));
+  $("aiGeri").onclick = () => { aiDurdur(); goster("yardimEkrani"); };
+
+  $("aiBaslatBtn").onclick = async () => {
+    const dosya = $("aiPdf").files[0];
+    if (!dosya) { mesaj("Önce bir PDF dosyası seç."); return; }
+    aiDurdur();
+    $("aiYonlendirme").classList.add("gizli");
+    mesaj("PDF okunuyor...");
+    const bas = Number($("aiBaslangic").value) || 1;
+    const bit = Number($("aiBitis").value) || 0;
+    if (bit && bas > bit) { mesaj("Başlangıç sayfası bitiş sayfasından büyük olamaz."); $("aiBaslangic").focus(); return; }
+    let sonuc;
+    try { sonuc = await pdfMetniCikar(dosya, bas, bit); }
+    catch (err) { mesaj("PDF açılamadı: " + err.message); return; }
+    aiMetin = sonuc.metin;
+
+    if (aiMetin.replace(/\s+/g, "").length < 20) {
+      return aiYonlendir("Seçtiğin sayfalarda okunabilir yazı bulunamadı; taranmış ya da fotoğraf olabilir. Bir gönüllü okuyucudan destek alabilirsin.", false);
+    }
+    if (islemAnalizi(aiMetin).islemli) {
+      return aiYonlendir("Bu metin yoğun olarak işlem ve formül içeriyor. Formüller sesli okumada doğru aktarılamaz, bir gönüllüden destek almanı öneririz.", true);
+    }
+    aiSesParcalari = [];
+    aiOku(0);
+  };
+
+  function aiYonlendir(metin, yineDeOkunabilir) {
+    $("aiYonlendirmeMetin").textContent = metin;
+    $("aiYineDeOku").classList.toggle("gizli", !yineDeOkunabilir);
+    $("aiYonlendirme").classList.remove("gizli");
+    mesaj(metin);
+    $("aiGonulluRandevu").focus();
+  }
+  $("aiGonulluRandevu").onclick = () => gonulluSecAdimi(OKUMA);
+  $("aiGonulluAra").onclick = () => aramaBaslat({ ders: OKUMA });
+  $("aiYineDeOku").onclick = () => { $("aiYonlendirme").classList.add("gizli"); aiSesParcalari = []; aiOku(0); };
+
+  // devam: hız değişti, aynı ses bağlamında o an okunan parçadan devam et
+  async function aiOku(baslangic = 0, devam = false) {
+    const no = ++aiOkumaNo;
+    devam = devam && aiCtx && aiCtx.state !== "closed";
+    if (devam) {
+      // Zamanlanmış eski sesleri sustur, aynı ses bağlamında kaldığı cümleden devam et
+      aiKaynaklar.forEach(x => { try { x.kaynak.stop(); } catch {} });
+    } else {
+      $("aiOynatici").classList.remove("gizli");
+      $("aiIndir").classList.add("gizli");
+      $("aiSimdiki").textContent = "";
+      $("aiDuraklatBtn").textContent = "Duraklat";
+      try {
+        if (!window.AiOkuma?.hazir()) { mesaj("Yapay zekâ modeli hazırlanıyor, ilk seferde biraz sürebilir."); await aiMotorunuYukle(); }
+      } catch (err) { mesaj("Yapay zekâ modeli yüklenemedi: " + err.message); return; }
+      if (no !== aiOkumaNo) return;
+      if (aiCtx && aiCtx.state !== "closed") aiCtx.close().catch(() => {});
+      aiCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    aiKaynaklar = [];
+    const ctx = aiCtx;
+    const hiz = aiHiz();
+    let zaman = ctx.currentTime + (devam ? 0.1 : 1.2); // ilk başta duyuru bitsin diye kısa bekleme
+    if (!devam) {
+      // Odak Duraklat butonunda: ekran okuyucuda iki kez dokunmak okumayı duraklatır
+      $("aiDuraklatBtn").focus();
+      mesaj("Okuma başlıyor. Duraklatmak için iki kez dokun. Hızı yukarıdan değiştirebilirsin.", true);
+      sessizMod = true;
+    }
+    try {
+      for await (const p of window.AiOkuma.sentezle(aiMetin.replace(/\n+/g, " "), hiz, 0, baslangic)) {
+        if (no !== aiOkumaNo) return;
+        aiSesParcalari[p.sira - 1] = p.audio;
+        const tampon = ctx.createBuffer(1, p.audio.length, window.AiOkuma.RATE);
+        tampon.copyToChannel(p.audio, 0);
+        const kaynak = ctx.createBufferSource();
+        kaynak.buffer = tampon; kaynak.connect(ctx.destination);
+        const basla = Math.max(zaman, ctx.currentTime + 0.05);
+        kaynak.start(basla);
+        zaman = basla + p.sure;
+        aiKaynaklar.push({ sira: p.sira, basla, bitis: zaman, kaynak });
+        // O an okunan cümleyi ekranda göster (ekran okuyucuyu bölmemek için sessiz alan)
+        setTimeout(() => { if (no === aiOkumaNo) $("aiSimdiki").textContent = p.metin; }, Math.max(0, (basla - ctx.currentTime) * 1000));
+        $("aiIlerleme").textContent = `Hazırlanan bölüm: ${p.sira} / ${p.toplam}`;
+        // Çok ileriye üretme: bellek dolmasın, hız değişirse çabuk tepki versin
+        while (no === aiOkumaNo && zaman - ctx.currentTime > 30) await new Promise(r => setTimeout(r, 400));
+      }
+      // Son bölüm bitene kadar bekle
+      while (no === aiOkumaNo && ctx.state !== "closed" && ctx.currentTime < zaman) await new Promise(r => setTimeout(r, 400));
+      if (no !== aiOkumaNo) return;
+      $("aiIndir").href = URL.createObjectURL(window.AiOkuma.wavYap(aiSesParcalari.filter(Boolean)));
+      $("aiIndir").classList.remove("gizli");
+      $("aiIlerleme").textContent = "Okuma tamamlandı.";
+      sessizMod = false;
+      ton("bitti");
+      mesaj("Okuma bitti. İstersen sesi indirip sonra dinleyebilirsin.", true);
+    } catch (err) {
+      if (no === aiOkumaNo) { sessizMod = false; mesaj("Okuma sırasında hata oluştu: " + err.message, true); }
+    }
+  }
+
+  $("aiDuraklatBtn").onclick = async () => {
+    if (!aiCtx || aiCtx.state === "closed") return;
+    if (aiCtx.state === "running") { await aiCtx.suspend(); sessizMod = false; $("aiDuraklatBtn").textContent = "Devam et"; mesaj("Okuma duraklatıldı. Devam etmek için iki kez dokun.", true); }
+    else { await aiCtx.resume(); $("aiDuraklatBtn").textContent = "Duraklat"; sessizMod = true; }
+  };
+  $("aiDurdurBtn").onclick = () => { aiDurdur(); mesaj("Okuma durduruldu."); };
+
+  function aiDurdur() {
+    aiOkumaNo++;
+    aiKaynaklar = [];
+    sessizMod = false;
+    if (aiCtx && aiCtx.state !== "closed") aiCtx.close().catch(() => {});
+    aiCtx = null;
+    $("aiOynatici").classList.add("gizli");
+  }
+
+  // =========================================================
+  // DERS DEĞERLENDİRME (5 yıldız)
+  // =========================================================
+  const KRITERLER = {
+    ders: [["anlatim", "Anlatım şekli"], ["hakimiyet", "Konuya hâkimiyet"], ["ses", "Ses kalitesi"], ["genel", "Genel memnuniyet"]],
+    okuma: [["anlatim", "Okuma netliği ve hızı"], ["ses", "Ses kalitesi"], ["genel", "Genel memnuniyet"]]
+  };
+  const KRITER_ADI = { anlatim: "Anlatım", hakimiyet: "Hâkimiyet", ses: "Ses", genel: "Genel" };
+  let degerlendirilen = null;
+
+  function degerlendirmeAc(g) {
+    degerlendirilen = g;
+    const konu = g.tur === "okuma" ? "metin okuma" : (g.ders ? `${g.ders} dersi` : "ders");
+    $("degerlendirmeBilgi").textContent = `${g.gonulluAd || "Anlatıcı"} ile yaptığın ${konu} nasıldı? Her başlığı 1 ile 5 yıldız arasında puanla.`;
+    $("yorum").value = "";
+    const kutu = $("kriterler");
+    kutu.innerHTML = "";
+    (KRITERLER[g.tur === "okuma" ? "okuma" : "ders"]).forEach(([anahtar, ad]) => {
+      const fs = el("fieldset", { class: "yildizlar" }, el("legend", {}, ad));
+      for (let n = 1; n <= 5; n++) {
+        const radyo = el("input", { type: "radio", name: "puan-" + anahtar, value: String(n), "aria-label": `${n} yıldız` });
+        radyo.addEventListener("change", () => {
+          fs.querySelectorAll("label.yildiz").forEach((l, i) => l.classList.toggle("dolu", i < n));
+        });
+        fs.append(el("label", { class: "yildiz" }, radyo, el("span", { "aria-hidden": "true" }, "★")));
+      }
+      kutu.append(fs);
+    });
+    goster("degerlendirmeEkrani");
+  }
+
+  $("degerlendirmeAtla").onclick = () => {
+    degerlendirilen = null;
+    anaPaneliGoster();
+    mesaj("İstersen dersi daha sonra Geçmiş derslerim bölümünden değerlendirebilirsin.");
+  };
+
+  $("degerlendirmeFormu").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const g = degerlendirilen;
+    if (!g) return;
+    const puanlar = {};
+    for (const [anahtar, ad] of KRITERLER[g.tur === "okuma" ? "okuma" : "ders"]) {
+      const secili = document.querySelector(`input[name="puan-${anahtar}"]:checked`);
+      if (!secili) { mesaj(`Lütfen "${ad}" başlığını puanla.`); document.querySelector(`input[name="puan-${anahtar}"]`).focus(); return; }
+      puanlar[anahtar] = Number(secili.value);
+    }
+    const degerler = Object.values(puanlar);
+    const ortalama = Math.round(degerler.reduce((t, x) => t + x, 0) / degerler.length * 10) / 10;
+    try {
+      // Belge kimliği görüşme kimliği: her görüşme yalnızca bir kez değerlendirilir
+      await setDoc(doc(db, "degerlendirmeler", g.id), {
+        aramaId: g.id, ogrenciUid: ben.uid, gonulluUid: g.gonulluUid, gonulluAd: g.gonulluAd || "",
+        ders: g.ders || "", tur: g.tur || "ders", puanlar, ortalama,
+        yorum: $("yorum").value.trim(), tarih: serverTimestamp()
+      });
+      degerlendirilen = null;
+      anaPaneliGoster();
+      mesaj(`Teşekkürler! ${ortalama} yıldızlık değerlendirmen kaydedildi.`);
+    } catch (err) {
+      mesaj(err.code === "permission-denied" ? "Bu ders zaten değerlendirilmiş." : "Değerlendirme kaydedilemedi: " + err.message);
+    }
+  });
+
+  // Gönüllülerin ortalama puanları (Firestore "in" sorgusu en fazla 30 değer alır)
+  async function puanlariGetir(uidler) {
+    const sonuc = {};
+    for (let i = 0; i < uidler.length; i += 30) {
+      const parca = uidler.slice(i, i + 30);
+      if (!parca.length) continue;
+      try {
+        const snap = await getDocs(query(collection(db, "degerlendirmeler"), where("gonulluUid", "in", parca)));
+        snap.docs.forEach(d => {
+          const v = d.data();
+          const s = sonuc[v.gonulluUid] ||= { toplam: 0, sayi: 0, kriter: {} };
+          s.toplam += v.ortalama; s.sayi++;
+          for (const [k, p] of Object.entries(v.puanlar || {})) {
+            const kr = s.kriter[k] ||= { toplam: 0, sayi: 0 };
+            kr.toplam += p; kr.sayi++;
+          }
+        });
+      } catch (err) { console.warn("Puanlar alınamadı", err); }
+    }
+    Object.values(sonuc).forEach(s => { s.ort = s.toplam / s.sayi; });
+    return sonuc;
+  }
+
+  async function kendiPuaniniGoster() {
+    const p = (await puanlariGetir([ben.uid]))[ben.uid];
+    const kutu = $("puanBilgi");
+    if (!p) { kutu.classList.add("gizli"); return; }
+    const detay = Object.entries(p.kriter).map(([k, v]) => `${KRITER_ADI[k] || k} ${(v.toplam / v.sayi).toFixed(1)}`).join(" · ");
+    kutu.textContent = `Puanın: 5 üzerinden ${p.ort.toFixed(1)} yıldız (${p.sayi} değerlendirme). ${detay}`;
+    kutu.classList.remove("gizli");
+  }
+
+  // =========================================================
+  // GEÇMİŞ DERSLER
+  // =========================================================
+  $("gecmisBtn").onclick = gecmisAc;
+  $("gecmisGeri").onclick = anaPaneliGoster;
+
+  async function gecmisAc() {
+    goster("gecmisEkrani");
+    const ul = $("gecmisListe");
+    ul.innerHTML = "";
+    ul.append(el("li", { class: "bos" }, "Yükleniyor..."));
+    const alan = ben.rol === "gonullu" ? "gonulluUid" : "ogrenciUid";
+    let snap;
+    try { snap = await getDocs(query(collection(db, "aramalar"), where(alan, "==", ben.uid))); }
+    catch { ul.innerHTML = ""; ul.append(el("li", { class: "bos" }, "Geçmiş yüklenemedi.")); return; }
+    const liste = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(a => ["bitti", "kabul"].includes(a.durum) && a.id !== aktifAramaId)
+      .sort((a, b) => (b.olusturma?.toMillis?.() || 0) - (a.olusturma?.toMillis?.() || 0))
+      .slice(0, 50);
+    ul.innerHTML = "";
+    if (!liste.length) { ul.append(el("li", { class: "bos" }, "Henüz tamamlanmış bir görüşmen yok.")); return; }
+
+    // Bu görüşmelere verilmiş puanlar
+    const puanHaritasi = {};
+    try {
+      const ps = await getDocs(query(collection(db, "degerlendirmeler"), where(alan, "==", ben.uid)));
+      ps.docs.forEach(d => { puanHaritasi[d.id] = d.data(); });
+    } catch {}
+    const toplamSn = liste.reduce((t, a) => t + (a.sureSn || 0), 0);
+    ul.append(el("li", { class: "uyari" },
+      `Toplam ${liste.length} görüşme, ${Math.round(toplamSn / 60)} dakika` +
+      (ben.rol === "gonullu" ? " gönüllü destek verdin." : ".")));
+
+    for (const a of liste) {
+      const tarih = a.olusturma?.toDate ? tarihYaz(a.olusturma.toMillis()) : "Tarih bilinmiyor";
+      const konu = a.tur === "okuma" ? "Metin okuma" : (a.ders || "Ders belirtilmedi");
+      const karsi = ben.rol === "gonullu" ? a.ogrenciAd : (a.gonulluAd || "Gönüllü");
+      const sure = typeof a.sureSn !== "number" ? "süre kaydedilmedi"
+        : a.sureSn < 60 ? `${a.sureSn} saniye` : `${Math.round(a.sureSn / 60)} dakika`;
+      const li = el("li", { class: "kart" }, `${tarih} · ${konu} · ${karsi} · ${sure}`);
+      const puan = puanHaritasi[a.id];
+      if (puan) {
+        li.append(el("p", {}, `Puan: 5 üzerinden ${puan.ortalama} yıldız` + (puan.yorum ? ` · "${puan.yorum}"` : "")));
+      } else if (ben.rol === "ogrenci" && a.gonulluUid && (a.sureSn || 0) > 0) {
+        const d = el("button", {}, "Bu dersi değerlendir");
+        d.onclick = () => degerlendirmeAc({ id: a.id, gonulluUid: a.gonulluUid, gonulluAd: a.gonulluAd, ders: a.ders, tur: a.tur });
+        li.append(d);
+      }
+
+      {
+        let kayit = null;
+        try { kayit = await kayitGetir(a.id); } catch {}
+        if (kayit?.blob) {
+          const url = URL.createObjectURL(kayit.blob);
+          li.append(el("audio", { class: "kayitOynatici", controls: "", src: url, "aria-label": `${konu} görüşme kaydı` }));
+          const uzanti = kayit.blob.type.includes("mp4") ? "m4a" : "webm";
+          li.append(el("a", { class: "baglanti", href: url, download: `sen-anlat-${konu}.${uzanti}` }, "Kaydı indir"));
+          const sil = el("button", { class: "ikincil" }, "Kaydı sil");
+          sil.onclick = async () => {
+            if (!confirm("Bu görüşme kaydı cihazından silinsin mi?")) return;
+            await kayitSil(a.id);
+            mesaj("Kayıt silindi.");
+            gecmisAc();
+          };
+          li.append(sil);
+        }
+      }
+      ul.append(li);
+    }
+  }
+
+  // Öğrenci: randevulu (hedefUid dolu) veya anlık arama başlatır
+  async function aramaBaslat({ hedefUid = null, randevuId = null, ders = "", kayitKabul = true }) {
+    try {
+      mesaj("Mikrofon izni isteniyor...");
+      await mikrofonAl();
+      const aramaRef = doc(collection(db, "aramalar"));
+      aktifAramaId = aramaRef.id;
+      pcKur(collection(aramaRef, "ogrenciAdaylari"));
+      kanalKur(pc.createDataChannel("belge")); // belge kanalı teklif oluşturulmadan önce açılmalı
+      const bekleyenleriUygula = karsiAdaylariDinle(collection(aramaRef, "gonulluAdaylari"));
+
+      const teklif = await pc.createOffer();
+      await pc.setLocalDescription(teklif);
+      await setDoc(aramaRef, {
+        ogrenciUid: ben.uid, ogrenciAd: ben.adSoyad,
+        ders, hedefUid, randevuId,
+        tur: ders === OKUMA ? "okuma" : "ders",
+        kayitKabul,
+        durum: "bekliyor",
+        teklif: { type: teklif.type, sdp: teklif.sdp },
+        olusturma: serverTimestamp()
+      });
+
+      gorusmeEkraniAc(hedefUid ? "Gönüllünüz aranıyor. Lütfen bekleyin." : "Müsait bir gönüllü aranıyor. Lütfen bekleyin.");
+      mesaj("Arama gönderildi. Bekleme sırasında çalma sesi duyacaksın.");
+      caliyorBaslat();
+
+      // Kimse açmazsa aramayı sonlandır ve ne yapabileceğini söyle
+      clearTimeout(cevapsizZamanlayici);
+      cevapsizZamanlayici = setTimeout(async () => {
+        if (aktifAramaId !== aramaRef.id || aktifGorusme) return;
+        try { await updateDoc(aramaRef, { durum: "cevapsiz" }); } catch {}
+        gorusmeyiKapat();
+        ton("hata");
+        mesaj(hedefUid
+          ? "Gönüllün şu an aramayı açamadı. Randevu alabilir ya da başka bir gönüllüyü arayabilirsin."
+          : "Şu an müsait bir gönüllü bulunamadı. Randevu almayı ya da biraz sonra tekrar aramayı deneyebilirsin.");
+      }, hedefUid ? 60000 : 90000);
+
+      aboneler.push(onSnapshot(aramaRef, async (snap) => {
+        const a = snap.data();
+        if (!a || !pc) return;
+        if (a.durum === "kabul" && a.cevap && !pc.currentRemoteDescription) {
+          await pc.setRemoteDescription(new RTCSessionDescription(a.cevap));
+          bekleyenleriUygula();
+          $("gorusmeDurum").textContent = `${a.gonulluAd} ile görüşme · ${izinMetni(a.gonulluKayitIzni)}`;
+          kayitDurumu = { karsi: a.gonulluKayitIzni === true, karsiAd: a.gonulluAd };
+          caliyorDurdur(); clearTimeout(cevapsizZamanlayici);
+          mesaj(a.gonulluAd + " aramanızı açtı. Bağlanılıyor..." + (a.gonulluKayitIzni ? " Bu görüşme kaydedilecek; istemezsen görüşmeyi bitirebilirsin." : " Bu görüşme kaydedilmeyecek."), true);
+          aktifGorusme = { id: aramaRef.id, gonulluUid: a.gonulluUid, gonulluAd: a.gonulluAd, ders: a.ders, tur: a.tur };
+        }
+        if (a.durum === "bitti") gorusmeyiKapat("Görüşme sona erdi.");
+      }));
+    } catch (err) {
+      gorusmeyiKapat();
+      ton("hata");
+      mesaj("Arama başlatılamadı: " + err.message);
+    }
+  }
+  let cevapsizZamanlayici = null;
+  $("okumaAraBtn").onclick = () => aramaBaslat({ ders: OKUMA });
+
+  // Gönüllü: okuyucu olmayı ana ekrandan tek dokunuşla aç/kapat
+  $("okuyucuAnahtar").addEventListener("change", async (e) => {
+    ben.okuyucu = e.target.checked;
+    await updateDoc(doc(db, "kullanicilar", ben.uid), { okuyucu: ben.okuyucu });
+    anaBilgiGuncelle();
+    gelenleriDinle();
+    mesaj(ben.okuyucu ? "Artık metin okuma isteklerini de alıyorsun." : "Metin okuma istekleri kapatıldı.");
+  });
+
+  // Gönüllü: "ilk açan kazanır" — transaction ile sadece bir kişi bağlanır
+  async function kabulEt(id) {
+    zilDurdur();
+    const ref = doc(db, "aramalar", id);
+    try { await mikrofonAl(); }
+    catch { mesaj("Mikrofon izni verilmedi."); return; }
+    try {
+      await runTransaction(db, async (tx) => {
+        const s = await tx.get(ref);
+        if (!s.exists() || s.data().durum !== "bekliyor") throw new Error("alindi");
+        tx.update(ref, { durum: "kabul", gonulluUid: ben.uid, gonulluAd: ben.adSoyad, gonulluKayitIzni: !!ben.kayitIzni, kabulZamani: serverTimestamp() });
+      });
+    } catch {
+      yerelAkis.getTracks().forEach(t => t.stop()); yerelAkis = null;
+      mesaj("Bu arama başka bir gönüllü tarafından açıldı.");
+      return;
+    }
+    try {
+      gelenleriBirak();
+      aktifAramaId = id;
+      const a = (await getDoc(ref)).data();
+      pcKur(collection(ref, "gonulluAdaylari"));
+      await pc.setRemoteDescription(new RTCSessionDescription(a.teklif));
+      karsiAdaylariDinle(collection(ref, "ogrenciAdaylari"));
+      const cevap = await pc.createAnswer();
+      await pc.setLocalDescription(cevap);
+      await updateDoc(ref, { cevap: { type: cevap.type, sdp: cevap.sdp } });
+
+      kayitDurumu = { karsi: true, karsiAd: a.ogrenciAd };
+      gorusmeEkraniAc(a.ogrenciAd + " ile görüşme" + (a.ders ? " · " + a.ders : ""));
+      mesaj("Bağlanılıyor...");
+      aboneler.push(onSnapshot(ref, (s) => {
+        if (s.data()?.durum === "bitti") gorusmeyiKapat("Görüşme sona erdi.");
+      }));
+    } catch (err) {
+      gorusmeyiKapat("Bağlantı hatası: " + err.message);
+    }
+  }
+</script>
+</body>
+</html>
