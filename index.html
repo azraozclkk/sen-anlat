@@ -529,7 +529,7 @@
   </section>
 
   <p id="mesaj" role="status" aria-live="polite"></p>
-  <audio id="uzakSes" autoplay></audio>
+  <audio id="uzakSes" autoplay playsinline></audio>
   <!-- HUKUKİ METİNLER (kayıt ve onay ekranlarına kopyalanır). Köşeli parantezli yerler doldurulmalıdır. -->
   <template id="hukukiMetinlerSablon">
     <details class="hukuki">
@@ -1778,7 +1778,7 @@
   // STUN: iki tarafın internetteki adresini bulur.
   // TURN: doğrudan bağlantı kurulamazsa (mobil veri, okul ağı) sesi aktarır.
   const ICE = { iceServers: [
-    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun.cloudflare.com:3478"] },
     { urls: ["turn:openrelay.metered.ca:80", "turn:openrelay.metered.ca:443",
              "turn:openrelay.metered.ca:443?transport=tcp"],
       username: "openrelayproject", credential: "openrelayproject" }
@@ -1791,19 +1791,41 @@
   function pcKur(kendiAdaylarim) {
     pc = new RTCPeerConnection(ICE);
     yerelAkis.getTracks().forEach(t => pc.addTrack(t, yerelAkis));
-    pc.ontrack = (e) => { $("uzakSes").srcObject = e.streams[0]; };
+    pc.ontrack = (e) => {
+      const ses = $("uzakSes");
+      ses.srcObject = e.streams[0];
+      ses.play().catch(() => {}); // bazı telefonlar otomatik çalmayı engeller
+    };
     pc.ondatachannel = (e) => kanalKur(e.channel); // gönüllü tarafı: öğrencinin açtığı belge kanalı
     pc.onicecandidate = (e) => { if (e.candidate) addDoc(kendiAdaylarim, e.candidate.toJSON()); };
     pc.onconnectionstatechange = () => {
       if (!pc) return;
+      if (pc.connectionState === "connected") clearTimeout(baglantiZamanlayici);
       if (pc.connectionState === "connected" && !baglantiBaslangic) {
         sureBaslat(); caliyorDurdur(); ton("baglandi");
         kayitKarari(); // yalnızca iki taraf da izin verdiyse kayıt
         mesaj("Bağlantı kuruldu, konuşabilirsiniz.", true);
         sessizMod = true; // bundan sonra sadece kritik mesajlar okunur
       }
-      if (pc.connectionState === "failed") { ton("hata"); mesaj("Bağlantı kurulamadı. Görüşmeyi bitirip tekrar deneyin.", true); }
+      if (pc.connectionState === "failed") baglantiKurulamadi();
     };
+  }
+
+  // Arama açıldıktan sonra ses bağlantısı 25 saniyede kurulamazsa ekranda takılı kalma
+  let baglantiZamanlayici = null;
+  function baglantiBekle() {
+    clearTimeout(baglantiZamanlayici);
+    baglantiZamanlayici = setTimeout(() => {
+      if (pc && pc.connectionState !== "connected") baglantiKurulamadi();
+    }, 25000);
+  }
+  function baglantiKurulamadi() {
+    clearTimeout(baglantiZamanlayici);
+    if (!pc) return;
+    ton("hata");
+    const id = aktifAramaId;
+    if (id) updateDoc(doc(db, "aramalar", id), { durum: "bitti", bitis: serverTimestamp(), sureSn: 0 }).catch(() => {});
+    gorusmeyiKapat("Ses bağlantısı kurulamadı. İnternet bağlantınızı kontrol edip tekrar arayın; iki telefon farklı ağlardaysa biriniz Wi-Fi'ye bağlanmayı deneyin.");
   }
 
   function karsiAdaylariDinle(koleksiyon) {
@@ -1970,6 +1992,7 @@
     sessizMod = false;
     caliyorDurdur();
     clearTimeout(cevapsizZamanlayici);
+    clearTimeout(baglantiZamanlayici);
     $("gorusmeBilgi").textContent = "";
     kayitBitir(); // kayıt açıksa durdurulur ve cihaza kaydedilir
     sureDurdur();
@@ -2757,6 +2780,7 @@
           $("gorusmeDurum").textContent = `${a.gonulluAd} ile görüşme · ${izinMetni(a.gonulluKayitIzni)}`;
           kayitDurumu = { karsi: a.gonulluKayitIzni === true, karsiAd: a.gonulluAd };
           caliyorDurdur(); clearTimeout(cevapsizZamanlayici);
+          baglantiBekle();
           mesaj(a.gonulluAd + " aramanızı açtı. Bağlanılıyor..." + (a.gonulluKayitIzni ? " Bu görüşme kaydedilecek; istemezsen görüşmeyi bitirebilirsin." : " Bu görüşme kaydedilmeyecek."), true);
           aktifGorusme = { id: aramaRef.id, gonulluUid: a.gonulluUid, gonulluAd: a.gonulluAd, ders: a.ders, tur: a.tur };
         }
@@ -2807,6 +2831,7 @@
       const cevap = await pc.createAnswer();
       await pc.setLocalDescription(cevap);
       await updateDoc(ref, { cevap: { type: cevap.type, sdp: cevap.sdp } });
+      baglantiBekle();
 
       kayitDurumu = { karsi: true, karsiAd: a.ogrenciAd };
       gorusmeEkraniAc(a.ogrenciAd + " ile görüşme" + (a.ders ? " · " + a.ders : ""));
