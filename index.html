@@ -400,7 +400,6 @@
     </fieldset>
     <div id="aiOynatici" class="gizli">
       <p id="aiIlerleme"></p>
-      <p id="aiSimdiki" class="kart" style="padding:14px;border-radius:12px"></p>
       <button id="aiDuraklatBtn" class="ikincil">Duraklat</button>
       <button id="aiDurdurBtn" class="ikincil">Okumayı bitir</button>
       <a id="aiIndir" class="baglanti gizli" download="sen-anlat-okuma.wav">Sesi indir (WAV)</a>
@@ -2204,6 +2203,65 @@
   let aiSesParcalari = []; // indirme için, parça sırasına göre son üretilen sesler
   const aiHiz = () => Number(document.querySelector('input[name="aiHiz"]:checked')?.value) || 0.95;
 
+  // Ses, butona basıldığı anda açılmalı: tarayıcılar (özellikle iPhone) kullanıcı dokunuşu
+  // dışında açılan sesi susturur. Model yüklenirken geçen süre bu izni kaybettiriyordu.
+  function aiSesHazirla() {
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {} // iPhone sessiz modda da çalsın
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC && (!aiCtx || aiCtx.state === "closed")) {
+      try { aiCtx = new AC({ sampleRate: 48000 }); } catch { aiCtx = new AC(); }
+    }
+    if (aiCtx) {
+      aiCtx.resume().catch(() => {});
+      try { // sessiz kısa bir ses çalarak kilidi aç
+        const b = aiCtx.createBuffer(1, 1, 22050), k = aiCtx.createBufferSource();
+        k.buffer = b; k.connect(aiCtx.destination); k.start(0);
+      } catch {}
+    }
+    if ("speechSynthesis" in window) { // yedek ses için de kilidi aç
+      try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch {}
+    }
+  }
+
+  // ---------- Yedek okuma: yapay zekâ modeli yüklenemezse telefonun kendi Türkçe sesi ----------
+  let aiYedek = null; // { cumleler, sira, jeton, duraklatildi }
+  function aiYedekOku(baslangic = 0) {
+    if (!("speechSynthesis" in window)) { sessizMod = false; mesaj("Bu cihazda sesli okuma desteklenmiyor.", true); return; }
+    const no = aiOkumaNo;
+    const parcalar = [];
+    let cur = "";
+    for (const c of aiMetin.replace(/\s+/g, " ").split(/(?<=[.?!])\s+/)) {
+      if (cur && cur.length + c.length > 220) { parcalar.push(cur); cur = c; } else cur = cur ? cur + " " + c : c;
+    }
+    if (cur.trim()) parcalar.push(cur);
+    aiYedek = { cumleler: parcalar, sira: Math.max(0, baslangic), jeton: 0, duraklatildi: false };
+    $("aiOynatici").classList.remove("gizli");
+    $("aiDuraklatBtn").textContent = "Duraklat";
+    sessizMod = true;
+    aiYedekSonraki(no);
+  }
+  function aiYedekSonraki(no = aiOkumaNo) {
+    const y = aiYedek;
+    if (!y || no !== aiOkumaNo || y.duraklatildi) return;
+    speechSynthesis.cancel();
+    if (y.sira >= y.cumleler.length) {
+      aiYedek = null; sessizMod = false;
+      $("aiIlerleme").textContent = "Okuma tamamlandı.";
+      ton("bitti"); mesaj("Okuma bitti.", true);
+      return;
+    }
+    const jeton = ++y.jeton;
+    const u = new SpeechSynthesisUtterance(y.cumleler[y.sira]);
+    u.lang = "tr-TR";
+    const ses = speechSynthesis.getVoices().find(v => (v.lang || "").toLowerCase().startsWith("tr"));
+    if (ses) u.voice = ses;
+    u.rate = aiHiz() > 1 ? 1.3 : 1;
+    u.onend = () => { if (aiYedek === y && jeton === y.jeton && !y.duraklatildi) { y.sira++; aiYedekSonraki(no); } };
+    u.onerror = (e) => { if (e.error !== "interrupted" && e.error !== "canceled" && aiYedek === y && jeton === y.jeton) { y.sira++; aiYedekSonraki(no); } };
+    $("aiIlerleme").textContent = `Okunan bölüm: ${y.sira + 1} / ${y.cumleler.length}`;
+    speechSynthesis.speak(u);
+  }
+
   $("aiOkumaBtn").onclick = () => {
     $("aiYonlendirme").classList.add("gizli");
     goster("aiOkumaEkrani");
@@ -2225,6 +2283,7 @@
 
   // Okurken hız değişirse: o an okunan cümleden itibaren yeni hızla devam et
   document.querySelectorAll('input[name="aiHiz"]').forEach(r => r.addEventListener("change", () => {
+    if (aiYedek) { if (!aiYedek.duraklatildi) aiYedekSonraki(); return; }
     if (!aiCtx || aiCtx.state === "closed" || !aiKaynaklar.length) return;
     const simdi = aiCtx.currentTime;
     const suanki = aiKaynaklar.find(x => x.bitis > simdi);
@@ -2237,6 +2296,7 @@
     const dosya = $("aiPdf").files[0];
     if (!dosya) { mesaj("Önce bir PDF dosyası seç."); return; }
     aiDurdur();
+    aiSesHazirla();
     $("aiYonlendirme").classList.add("gizli");
     mesaj("PDF okunuyor...");
     const bas = Number($("aiBaslangic").value) || 1;
@@ -2266,7 +2326,7 @@
   }
   $("aiGonulluRandevu").onclick = () => gonulluSecAdimi(OKUMA);
   $("aiGonulluAra").onclick = () => aramaBaslat({ ders: OKUMA });
-  $("aiYineDeOku").onclick = () => { $("aiYonlendirme").classList.add("gizli"); aiSesParcalari = []; aiOku(0); };
+  $("aiYineDeOku").onclick = () => { aiSesHazirla(); $("aiYonlendirme").classList.add("gizli"); aiSesParcalari = []; aiOku(0); };
 
   // devam: hız değişti, aynı ses bağlamında o an okunan parçadan devam et
   async function aiOku(baslangic = 0, devam = false) {
@@ -2278,14 +2338,20 @@
     } else {
       $("aiOynatici").classList.remove("gizli");
       $("aiIndir").classList.add("gizli");
-      $("aiSimdiki").textContent = "";
       $("aiDuraklatBtn").textContent = "Duraklat";
       try {
         if (!window.AiOkuma?.hazir()) { mesaj("Yapay zekâ modeli hazırlanıyor, ilk seferde biraz sürebilir."); await aiMotorunuYukle(); }
-      } catch (err) { mesaj("Yapay zekâ modeli yüklenemedi: " + err.message); return; }
+      } catch (err) {
+        if (no !== aiOkumaNo) return;
+        console.warn("Yapay zekâ modeli yüklenemedi", err);
+        mesaj("Yapay zekâ sesi yüklenemedi, telefonun kendi Türkçe sesiyle okuyorum.", true);
+        aiYedekOku(baslangic);
+        return;
+      }
       if (no !== aiOkumaNo) return;
-      if (aiCtx && aiCtx.state !== "closed") aiCtx.close().catch(() => {});
-      aiCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!aiCtx || aiCtx.state === "closed") aiSesHazirla();
+      if (!aiCtx) { aiYedekOku(baslangic); return; }
+      await aiCtx.resume().catch(() => {});
     }
     aiKaynaklar = [];
     const ctx = aiCtx;
@@ -2301,6 +2367,7 @@
       for await (const p of window.AiOkuma.sentezle(aiMetin.replace(/\n+/g, " "), hiz, 0, baslangic)) {
         if (no !== aiOkumaNo) return;
         aiSesParcalari[p.sira - 1] = p.audio;
+        if (ctx.state === "suspended" && $("aiDuraklatBtn").textContent === "Duraklat") ctx.resume().catch(() => {});
         const tampon = ctx.createBuffer(1, p.audio.length, window.AiOkuma.RATE);
         tampon.copyToChannel(p.audio, 0);
         const kaynak = ctx.createBufferSource();
@@ -2309,8 +2376,6 @@
         kaynak.start(basla);
         zaman = basla + p.sure;
         aiKaynaklar.push({ sira: p.sira, basla, bitis: zaman, kaynak });
-        // O an okunan cümleyi ekranda göster (ekran okuyucuyu bölmemek için sessiz alan)
-        setTimeout(() => { if (no === aiOkumaNo) $("aiSimdiki").textContent = p.metin; }, Math.max(0, (basla - ctx.currentTime) * 1000));
         $("aiIlerleme").textContent = `Hazırlanan bölüm: ${p.sira} / ${p.toplam}`;
         // Çok ileriye üretme: bellek dolmasın, hız değişirse çabuk tepki versin
         while (no === aiOkumaNo && zaman - ctx.currentTime > 30) await new Promise(r => setTimeout(r, 400));
@@ -2325,11 +2390,25 @@
       ton("bitti");
       mesaj("Okuma bitti. İstersen sesi indirip sonra dinleyebilirsin.", true);
     } catch (err) {
-      if (no === aiOkumaNo) { sessizMod = false; mesaj("Okuma sırasında hata oluştu: " + err.message, true); }
+      if (no !== aiOkumaNo) return;
+      console.warn("Yapay zekâ okuma hatası", err);
+      if (!aiKaynaklar.length) { // hiç ses üretilemediyse yedek sesle oku
+        mesaj("Yapay zekâ sesi çalışmadı, telefonun kendi Türkçe sesiyle okuyorum.", true);
+        aiYedekOku(baslangic);
+      } else { sessizMod = false; mesaj("Okuma sırasında hata oluştu: " + err.message, true); }
     }
   }
 
   $("aiDuraklatBtn").onclick = async () => {
+    if (aiYedek) {
+      if (!aiYedek.duraklatildi) {
+        aiYedek.duraklatildi = true; aiYedek.jeton++; speechSynthesis.cancel(); sessizMod = false;
+        $("aiDuraklatBtn").textContent = "Devam et"; mesaj("Okuma duraklatıldı. Devam etmek için iki kez dokun.", true);
+      } else {
+        aiYedek.duraklatildi = false; sessizMod = true; $("aiDuraklatBtn").textContent = "Duraklat"; aiYedekSonraki();
+      }
+      return;
+    }
     if (!aiCtx || aiCtx.state === "closed") return;
     if (aiCtx.state === "running") { await aiCtx.suspend(); sessizMod = false; $("aiDuraklatBtn").textContent = "Devam et"; mesaj("Okuma duraklatıldı. Devam etmek için iki kez dokun.", true); }
     else { await aiCtx.resume(); $("aiDuraklatBtn").textContent = "Duraklat"; sessizMod = true; }
@@ -2340,6 +2419,7 @@
     aiOkumaNo++;
     aiKaynaklar = [];
     sessizMod = false;
+    if (aiYedek) { aiYedek = null; try { speechSynthesis.cancel(); } catch {} }
     if (aiCtx && aiCtx.state !== "closed") aiCtx.close().catch(() => {});
     aiCtx = null;
     $("aiOynatici").classList.add("gizli");
