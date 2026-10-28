@@ -6,7 +6,7 @@
 
 ---
 
-## 📌 Neden bu uygulamayı yaptık?
+## 🎯 Projenin Amacı
 
 2020 verilerine göre Türkiye'de **8 binden fazla görme engelli üniversite öğrencisi** var.
 
@@ -101,7 +101,7 @@ Uygulama hem kullanıcılar için hem de bizim için ücretsiz çalışıyor. Fi
 
 ---
 
-## 🛠️ Hangi teknolojilerle yapıldı?
+## 🛠️ Kullanılan Teknolojiler
 
 | Ne için? | Ne kullanıldı? |
 |---|---|
@@ -133,7 +133,11 @@ Uygulama hem kullanıcılar için hem de bizim için ücretsiz çalışıyor. Fi
 
 ---
 
-## ⚙️ Kendi bilgisayarında nasıl çalıştırırsın?
+## ⚙️ Nasıl Çalıştırılır?
+
+**Hazır sürümü denemek için:** https://tangerine-puppy-f3b9bc.netlify.app adresini telefonda ya da bilgisayarda aç. `.edu.tr` uzantılı üniversite e-postanla kayıt ol, e-postana gelen bağlantıyla hesabını doğrula ve giriş yap. Ses ve mikrofon için en iyi sonucu Chrome ya da Safari'de alırsın.
+
+**Kendi sürümünü kurmak için:**
 
 1. [Firebase](https://console.firebase.google.com)'da ücretsiz bir proje oluştur.
 2. **Authentication** kısmında "E-posta/Şifre" ile girişi aç.
@@ -144,6 +148,15 @@ Uygulama hem kullanıcılar için hem de bizim için ücretsiz çalışıyor. Fi
 
 **Yeni ders eklemek:** `dersler.js` dosyasında uygun alana `| Ders Adı` yazman yeterli.
 **Aynı içerikli dersleri eşleştirmek:** `ders-eslestirme.js` dosyasındaki `GRUPLAR` listesine yeni bir satır ekle. Örneğin: `["Lineer Cebir", "Doğrusal Cebir"]`.
+
+---
+
+## 👥 Ekip
+
+| Ad Soyad | Bölüm | Görev |
+|---|---|---|
+| Azra Özçelik | Veri Bilimi ve Analitiği, Sakarya Üniversitesi | [GÖREV] |
+| [AD SOYAD] | [BÖLÜM] | [GÖREV] |
 
 ---
 
