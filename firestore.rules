@@ -7,16 +7,27 @@ service cloud.firestore {
       return request.auth != null
         && request.auth.token.email.lower().matches('.*[.]edu[.]tr');
     }
-    // ...ve doğrulanmış
+    // ...doğrulanmış ve yasaklanmamış
     function dogrulanmisOgrenci() {
-      return universiteEpostasi() && request.auth.token.email_verified == true;
+      return universiteEpostasi() && request.auth.token.email_verified == true
+        && !exists(/databases/$(database)/documents/yasakliEpostalar/$(request.auth.token.email.lower()));
+    }
+    // Hedef kişi, en az bir görüşmede karşı taraftaysa
+    function gorusmeOrtagi(aramaId, hedef) {
+      let a = get(/databases/$(database)/documents/aramalar/$(aramaId)).data;
+      return (a.ogrenciUid == request.auth.uid && a.gonulluUid == hedef)
+          || (a.gonulluUid == request.auth.uid && a.ogrenciUid == hedef);
+    }
+    function engelledi(hedef, uid) {
+      return exists(/databases/$(database)/documents/engellemeler/$(hedef + "_" + uid));
     }
     function ben(uid) { return request.auth != null && request.auth.uid == uid; }
 
     // Kullanıcılar: kayıt sırasında (doğrulamadan önce) kişi kendi kaydını oluşturabilir;
     // okuma ve güncelleme için e-postanın doğrulanmış olması gerekir
     match /kullanicilar/{uid} {
-      allow create: if ben(uid) && universiteEpostasi();
+      allow create: if ben(uid) && universiteEpostasi()
+        && !exists(/databases/$(database)/documents/yasakliEpostalar/$(request.auth.token.email.lower()));
       allow read: if dogrulanmisOgrenci();
       allow update: if ben(uid) && dogrulanmisOgrenci();
     }
@@ -27,6 +38,46 @@ service cloud.firestore {
     }
     match /aramalar/{yol=**} {
       allow read, write: if dogrulanmisOgrenci();
+    }
+
+    // Her kullanıcının e-postası: sadece kendisi yazar; sadece onu engellemiş kişiler okuyabilir
+    // (5. engelleyen, yasaklamak için e-postayı buradan alır)
+    match /epostalar/{uid} {
+      allow create, update: if ben(uid) && universiteEpostasi()
+        && request.resource.data.eposta == request.auth.token.email.lower();
+      allow get: if ben(uid) || (dogrulanmisOgrenci() && engelledi(uid, request.auth.uid));
+    }
+
+    // Engelleme ve şikayet: kişi başına bir kez, yalnızca birlikte görüşme yapılmış birine
+    match /engellemeler/{id} {
+      allow read: if dogrulanmisOgrenci();
+      allow create: if dogrulanmisOgrenci()
+        && request.resource.data.engelleyenUid == request.auth.uid
+        && request.resource.data.hedefUid != request.auth.uid
+        && id == request.resource.data.hedefUid + "_" + request.auth.uid
+        && gorusmeOrtagi(request.resource.data.aramaId, request.resource.data.hedefUid);
+    }
+
+    // Yasaklı e-postalar: 5 farklı engelleme varsa, engelleyenlerden biri oluşturabilir. Silinemez.
+    match /yasakliEpostalar/{eposta} {
+      allow get: if request.auth != null && request.auth.token.email.lower() == eposta;
+      allow create: if dogrulanmisOgrenci()
+        && request.resource.data.engelleyenler is list
+        && request.resource.data.engelleyenler.size() == 5
+        && request.resource.data.engelleyenler.toSet().size() == 5
+        && request.auth.uid in request.resource.data.engelleyenler
+        && get(/databases/$(database)/documents/epostalar/$(request.resource.data.hedefUid)).data.eposta == eposta
+        && engelledi(request.resource.data.hedefUid, request.resource.data.engelleyenler[0])
+        && engelledi(request.resource.data.hedefUid, request.resource.data.engelleyenler[1])
+        && engelledi(request.resource.data.hedefUid, request.resource.data.engelleyenler[2])
+        && engelledi(request.resource.data.hedefUid, request.resource.data.engelleyenler[3])
+        && engelledi(request.resource.data.hedefUid, request.resource.data.engelleyenler[4]);
+    }
+    // Listelerden gizlemek için yasaklı kullanıcılar (e-posta yasağıyla birlikte oluşturulur)
+    match /yasakliKullanicilar/{uid} {
+      allow read: if dogrulanmisOgrenci();
+      allow create: if dogrulanmisOgrenci()
+        && getAfter(/databases/$(database)/documents/yasakliEpostalar/$(request.resource.data.eposta)).data.hedefUid == uid;
     }
 
     // Değerlendirmeler: sadece o görüşmedeki öğrenci, o görüşmenin anlatıcısını,

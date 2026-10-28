@@ -49,6 +49,8 @@
            background: var(--ana); color: #FFFFFF; cursor: pointer; }
   button:disabled { opacity: .5; cursor: not-allowed; }
   button.ikincil { background: var(--kart); color: var(--yazi); border-color: var(--kenar); }
+  button.tehlikeIkincil { background: var(--kart); color: var(--kirmizi); border-color: var(--kirmizi); }
+  html.yuksekKontrast button.tehlikeIkincil { background: #000; color: #FF8A8A; border-color: #FF8A8A; }
   button.buyuk { min-height: 96px; font-size: 26px; border-radius: 24px; box-shadow: 0 6px 0 var(--bant); margin-bottom: 6px; }
   button.buyuk:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--bant); }
   button.tehlike { background: var(--kirmizi); border-color: var(--kirmizi); min-height: 88px; font-size: 26px; border-radius: 24px; }
@@ -437,6 +439,27 @@
       <button type="submit">Değerlendirmeyi gönder</button>
     </form>
     <button class="ikincil" id="degerlendirmeAtla">Şimdi değil</button>
+    <button class="tehlikeIkincil" id="degerlendirmeEngelle">Engelle ve şikayet et</button>
+  </section>
+
+  <!-- ENGELLE VE ŞİKAYET ET -->
+  <section id="engelEkrani" class="gizli" aria-labelledby="engelBaslik">
+    <h2 id="engelBaslik">Engelle ve şikayet et</h2>
+    <p id="engelBilgi"></p>
+    <form id="engelFormu">
+      <fieldset>
+        <legend>Ne oldu?</legend>
+        <label class="secim"><input type="radio" name="engelSebep" value="kaba" required> Kaba ya da saygısız davrandı</label>
+        <label class="secim"><input type="radio" name="engelSebep" value="uygunsuz"> Uygunsuz konuştu ya da rahatsız etti</label>
+        <label class="secim"><input type="radio" name="engelSebep" value="ilgisiz"> Ders anlatmadı, zamanımı boşa harcadı</label>
+        <label class="secim"><input type="radio" name="engelSebep" value="gelmedi"> Randevuya gelmedi</label>
+        <label class="secim"><input type="radio" name="engelSebep" value="diger"> Diğer</label>
+      </fieldset>
+      <label for="engelNot">Açıklama (isteğe bağlı)</label>
+      <textarea id="engelNot" maxlength="500"></textarea>
+      <button type="submit" class="tehlike">Engelle ve şikayet et</button>
+    </form>
+    <button class="ikincil" id="engelVazgec">Vazgeç</button>
   </section>
 
   <!-- GEÇMİŞ DERSLER -->
@@ -504,7 +527,7 @@
       <div class="hukukiMetin">
         <p><strong>Veri sorumlusu:</strong> Sen Anlat proje ekibi, [AD SOYAD / KURUM], iletişim: [E-POSTA ADRESİ].</p>
         <p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, Sen Anlat'ı kullanırken işlenen kişisel verilerin hakkında seni bilgilendiriyoruz.</p>
-        <p><strong>İşlenen veriler:</strong> ad soyad, üniversite e-posta adresi, seçtiğin dersler, müsait saatlerin, randevu ve görüşme bilgileri (tarih, süre, ders, karşı taraf), verdiğin ve aldığın değerlendirmeler ve görüşmelerin ses kayıtları.</p>
+        <p><strong>İşlenen veriler:</strong> ad soyad, üniversite e-posta adresi, seçtiğin dersler, yaptığın ve hakkında yapılan engelleme ve şikayetler, müsait saatlerin, randevu ve görüşme bilgileri (tarih, süre, ders, karşı taraf), verdiğin ve aldığın değerlendirmeler ve görüşmelerin ses kayıtları.</p>
         <p><strong>Özel nitelikli veri:</strong> "Destek almak istiyorum" rolünü seçmen, görme engelin olduğu anlamına gelebilir. Bu bilgi sağlık verisi sayılabileceğinden yalnızca açık rızanla işlenir.</p>
         <p><strong>Ses kayıtları (isteğe bağlı):</strong> Görüşmenin kaydedilip kaydedilmeyeceğine gönüllü karar verir; bu tercihini dilediği zaman "Derslerim" ekranından değiştirebilir. Destek alan öğrenci, gönüllünün kayda izin verip vermediğini görüşmeden önce görür ve kaydedilen bir görüşmeye katılıp katılmamaya kendisi karar verir. Kaydedilen bir görüşmeye katılmak, o görüşmenin kaydına izin vermek anlamına gelir; dilediğin zaman görüşmeyi sonlandırabilirsin. Görüşmeler iki tarafın kendi cihazında kaydedilir. Kayıtlar sunucuya yüklenmez, yalnızca kaydeden kişinin cihazında saklanır ve 90 gün sonra cihazdan otomatik silinir. Kayıt yapılırken ekranda her zaman gösterilir.</p>
         <p><strong>Paylaşılan belgeler:</strong> Görüşmede gönderilen PDF ve fotoğraflar sunucuya yüklenmez, doğrudan karşı tarafa iletilir ve görüşme bitince silinir. Yapay zekâ ile okuma tamamen cihazında yapılır.</p>
@@ -534,6 +557,7 @@
           <li>Yalnızca kendi üniversite e-postanla, gerçek bilgilerinle tek bir hesap açabilirsin.</li>
           <li>Görüşme kayıtlarını yalnızca kişisel ders çalışman için kullanabilirsin. Kayıtları karşı tarafın izni olmadan başkalarıyla paylaşmak, yayımlamak ya da internete yüklemek yasaktır ve TCK madde 133-134 ile KVKK kapsamında suç oluşturabilir.</li>
           <li>Hakaret, taciz, ayrımcılık, ticari amaçlı kullanım, ücret talep etme ve sınavlarda kopya yardımı yasaktır. Bu kurallara uymayan hesaplar kapatılır.</li>
+          <li>Görüştüğün bir kişiyi engelleyip şikayet edebilirsin; engellenen kişi bir daha karşına çıkmaz. 5 farklı kullanıcı tarafından engellenen kişinin e-posta adresi uygulamadan kalıcı olarak yasaklanır.</li>
           <li>Paylaştığın belgelerin paylaşım hakkına sahip olduğundan emin olmalısın; telif hakkıyla korunan içerikleri yalnızca kişisel kullanım sınırlarında paylaş.</li>
           <li>Yapay zekâ ile okutulan metinlerin sesi yapay olarak üretilir ve hatalar içerebilir.</li>
           <li>Acil bir sağlık ya da güvenlik durumunda 112'yi ara; Sen Anlat bir acil yardım hizmeti değildir.</li>
@@ -552,7 +576,7 @@
            onAuthStateChanged, signOut, sendEmailVerification, sendPasswordResetEmail }
            from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, onSnapshot,
-           query, where, runTransaction, serverTimestamp }
+           query, where, runTransaction, serverTimestamp, writeBatch, deleteDoc }
            from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -651,7 +675,7 @@
   const OKUMA = "Metin okuma (PDF)";
   const izinMetni = (v) => v ? "kayda izin veriyor" : "kayda izin vermiyor";
   // Hukuki metinler değiştiğinde sürümü artır: herkesten yeniden onay istenir
-  const KVKK_SURUM = "1.2";
+  const KVKK_SURUM = "1.3";
   document.querySelectorAll(".hukukiMetinler").forEach(k =>
     k.append($("hukukiMetinlerSablon").content.cloneNode(true)));
   const BOLUMLER = [...Object.keys(KATALOG), "Elektrik-Elektronik Mühendisliği", "Makine Mühendisliği",
@@ -697,7 +721,7 @@
   let gelenDinleyici = null, sonGelenDocs = [];
   const gorulenAramalar = new Set();
 
-  const EKRANLAR = ["kayitBolumu", "girisBolumu", "dogrulamaEkrani", "onayEkrani", "yardimEkrani", "rehberEkrani", "aiOkumaEkrani", "degerlendirmeEkrani", "gecmisEkrani", "anaEkran", "randevuEkrani", "profilEkrani", "gorusmeEkrani"];
+  const EKRANLAR = ["kayitBolumu", "girisBolumu", "dogrulamaEkrani", "onayEkrani", "yardimEkrani", "rehberEkrani", "aiOkumaEkrani", "degerlendirmeEkrani", "engelEkrani", "gecmisEkrani", "anaEkran", "randevuEkrani", "profilEkrani", "gorusmeEkrani"];
   let aktifEkran = null, rehberOncesi = null;
   function goster(bolum) {
     aktifEkran = bolum;
@@ -1060,6 +1084,7 @@
       const user = profilTamamlaModu
         ? auth.currentUser
         : (await createUserWithEmailAndPassword(auth, $("kayitEposta").value, $("kayitSifre").value)).user;
+      if (await yasakliMi(user)) return; // giriş dinleyicisi çıkış yapıp uyarıyı gösterir
       await setDoc(doc(db, "kullanicilar", user.uid), {
         rol, okuyucu,
         adSoyad: $("adSoyad").value.trim(),
@@ -1104,6 +1129,14 @@
       await signOut(auth);
       goster("girisBolumu");
       mesaj("Sen Anlat yalnızca üniversite e-postasıyla (.edu.tr) kullanılabilir. Lütfen okul e-postanla kayıt ol.");
+      return;
+    }
+    if (user && await yasakliMi(user)) {
+      panelDinleyicileriDurdur(); ben = null;
+      await signOut(auth);
+      goster("girisBolumu");
+      ton("hata");
+      mesaj(`Bu e-posta adresi, ${YASAK_ESIGI} farklı kullanıcı tarafından engellendiği için Sen Anlat'tan çıkarıldı.`, true);
       return;
     }
     if (user && !user.emailVerified) { panelDinleyicileriDurdur(); ben = null; dogrulamaGoster(user); }
@@ -1156,6 +1189,8 @@
       goster("onayEkrani"); return;
     }
     eskiKayitlariTemizle();
+    epostamiKaydet(auth.currentUser);
+    await engelleriYukle();
     const gonullu = ben.rol === "gonullu";
     // Öğrencide karşılama yazısı yok; başlık sadece ekran okuyucunun odaklanması için gizli durur
     $("anaBaslik").textContent = "Ana ekran";
@@ -1433,7 +1468,7 @@
       // Okuyucular bölüm ve sınıf fark etmeksizin listelenir
       const snap = await getDocs(query(collection(db, "kullanicilar"), where("rol", "==", "gonullu")));
       liste = snap.docs.map(d => ({ uid: d.id, musaitlik: [], dersler: [], ...d.data() }))
-        .filter(g => g.okuyucu && g.uid !== ben.uid);
+        .filter(g => g.okuyucu && g.uid !== ben.uid && !gorunmez(g.uid));
     } else {
       // Bölümdeki herkesi çekip ders adını sadeleştirerek karşılaştırıyoruz,
       // böylece elle yazılan dersler de yazım farkına takılmadan eşleşir
@@ -1441,7 +1476,7 @@
       // Bölüm ve sınıf fark etmez, dersi anlatabilen tüm gönüllüler. Ders adı farklı yazılmış ya da
       // aynı içerikli başka adla kaydedilmiş olsa da eşleşir (Kalkülüs I ≡ Matematik I)
       liste = snap.docs.map(d => ({ uid: d.id, musaitlik: [], dersler: [], ...d.data() }))
-        .filter(g => g.rol === "gonullu" && g.uid !== ben.uid
+        .filter(g => g.rol === "gonullu" && g.uid !== ben.uid && !gorunmez(g.uid)
                   && g.dersler.some(x => DersEslestirme.ayniDers(x, ders)))
         .map(g => ({ ...g, kayitliAd: g.dersler.find(x => dersNorm(x) === dersNorm(ders)) ? null
                                       : g.dersler.find(x => DersEslestirme.ayniDers(x, ders)) }));
@@ -1681,6 +1716,7 @@
     const liste = sonGelenDocs.filter(d => {
       const a = d.data();
       if (a.ogrenciUid === ben.uid) return false;
+      if ((a.haricUidler || []).includes(ben.uid) || gorunmez(a.ogrenciUid)) return false; // engelleme
       // Yarım kalmış eski aramalar (öğrenci sayfayı kapattıysa) gösterilmez
       const yas = Date.now() - (a.olusturma?.toMillis?.() ?? Date.now());
       if (yas > 2 * 60 * 1000) return false;
@@ -2373,6 +2409,94 @@
     }
   });
 
+  // =========================================================
+  // ENGELLEME VE ŞİKAYET
+  // Engellenen kişi, engelleyenin listelerinde ve aramalarında bir daha çıkmaz.
+  // 5 farklı kullanıcı tarafından engellenen kişinin e-postası uygulamadan kalıcı olarak yasaklanır.
+  // =========================================================
+  const YASAK_ESIGI = 5;
+  let engellediklerim = new Set();   // benim engellediğim kişiler
+  let yasaklilar = new Set();        // uygulamadan yasaklanmış kullanıcılar
+  let engelHedefi = null;
+
+  async function engelleriYukle() {
+    try {
+      const snap = await getDocs(query(collection(db, "engellemeler"), where("engelleyenUid", "==", ben.uid)));
+      engellediklerim = new Set(snap.docs.map(d => d.data().hedefUid));
+    } catch { engellediklerim = new Set(); }
+    try {
+      const snap = await getDocs(collection(db, "yasakliKullanicilar"));
+      yasaklilar = new Set(snap.docs.map(d => d.id));
+    } catch { yasaklilar = new Set(); }
+  }
+  const gorunmez = (uid) => engellediklerim.has(uid) || yasaklilar.has(uid);
+
+  // Kendi e-postamı kaydederim: beni engelleyen 5. kişi yasaklamak için bunu okuyabilir (başkası okuyamaz)
+  async function epostamiKaydet(user) {
+    try { await setDoc(doc(db, "epostalar", user.uid), { eposta: user.email.toLowerCase() }); } catch {}
+  }
+
+  async function yasakliMi(user) {
+    try { return (await getDoc(doc(db, "yasakliEpostalar", user.email.toLowerCase()))).exists(); }
+    catch { return false; }
+  }
+
+  function engelleAc({ hedefUid, hedefAd, aramaId, geri }) {
+    engelHedefi = { hedefUid, hedefAd, aramaId, geri };
+    $("engelBilgi").textContent = `${hedefAd || "Bu kişi"} engellendiğinde bir daha karşına çıkmaz ve aranızdaki randevular iptal edilir. Bir kişi ${YASAK_ESIGI} farklı kullanıcı tarafından engellenirse uygulamadan çıkarılır.`;
+    $("engelFormu").reset();
+    goster("engelEkrani");
+  }
+  $("engelVazgec").onclick = () => (engelHedefi?.geri || anaPaneliGoster)();
+  $("degerlendirmeEngelle").onclick = () => {
+    const g = degerlendirilen;
+    if (!g) return;
+    engelleAc({ hedefUid: g.gonulluUid, hedefAd: g.gonulluAd, aramaId: g.id, geri: () => degerlendirmeAc(g) });
+  };
+
+  $("engelFormu").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const h = engelHedefi;
+    const sebep = document.querySelector('input[name="engelSebep"]:checked')?.value;
+    if (!h || !sebep) { mesaj("Lütfen ne olduğunu seç."); return; }
+    try {
+      await setDoc(doc(db, "engellemeler", `${h.hedefUid}_${ben.uid}`), {
+        hedefUid: h.hedefUid, engelleyenUid: ben.uid, aramaId: h.aramaId,
+        sebep, not: $("engelNot").value.trim(), tarih: serverTimestamp()
+      });
+    } catch (err) {
+      mesaj("Engellenemedi: " + (err.code || err.message), true); return;
+    }
+    engellediklerim.add(h.hedefUid);
+    // Aradaki aktif randevuları iptal et
+    for (const r of randevularim.filter(r => r.durum === "aktif" && (r.gonulluUid === h.hedefUid || r.ogrenciUid === h.hedefUid))) {
+      try { await updateDoc(doc(db, "randevular", r.id), { durum: "iptal", iptalEden: ben.uid }); } catch {}
+    }
+    const yasaklandi = await yasakKontrol(h.hedefUid);
+    degerlendirilen = null;
+    anaPaneliGoster();
+    mesaj(`${h.hedefAd || "Kişi"} engellendi ve şikayetin kaydedildi.` + (yasaklandi ? ` Bu kişi ${YASAK_ESIGI} farklı kullanıcı tarafından engellendiği için uygulamadan çıkarıldı.` : ""), true);
+  });
+
+  // Hedef 5 farklı kişi tarafından engellendiyse e-postasını yasakla
+  async function yasakKontrol(hedefUid) {
+    try {
+      const snap = await getDocs(query(collection(db, "engellemeler"), where("hedefUid", "==", hedefUid)));
+      const engelleyenler = [...new Set(snap.docs.map(d => d.data().engelleyenUid))];
+      if (engelleyenler.length < YASAK_ESIGI) return false;
+      // Kural gereği listede ben de bulunmalıyım
+      const bes = [ben.uid, ...engelleyenler.filter(u => u !== ben.uid)].slice(0, YASAK_ESIGI);
+      const eposta = (await getDoc(doc(db, "epostalar", hedefUid))).data()?.eposta;
+      if (!eposta) return false;
+      const b = writeBatch(db);
+      b.set(doc(db, "yasakliEpostalar", eposta), { hedefUid, engelleyenler: bes, tarih: serverTimestamp() });
+      b.set(doc(db, "yasakliKullanicilar", hedefUid), { eposta });
+      await b.commit();
+      yasaklilar.add(hedefUid);
+      return true;
+    } catch (err) { console.warn("Yasak uygulanamadı", err); return false; }
+  }
+
   // Gönüllülerin ortalama puanları (Firestore "in" sorgusu en fazla 30 değer alır)
   async function puanlariGetir(uidler) {
     const sonuc = {};
@@ -2454,6 +2578,17 @@
         li.append(d);
       }
 
+      const karsiUid = ben.rol === "gonullu" ? a.ogrenciUid : a.gonulluUid;
+      if (karsiUid) {
+        if (engellediklerim.has(karsiUid)) {
+          li.append(el("p", {}, "Bu kişiyi engelledin."));
+        } else {
+          const eb = el("button", { class: "tehlikeIkincil" }, "Engelle ve şikayet et");
+          eb.onclick = () => engelleAc({ hedefUid: karsiUid, hedefAd: karsi, aramaId: a.id, geri: gecmisAc });
+          li.append(eb);
+        }
+      }
+
       {
         let kayit = null;
         try { kayit = await kayitGetir(a.id); } catch {}
@@ -2493,6 +2628,7 @@
         ogrenciUid: ben.uid, ogrenciAd: ben.adSoyad,
         ders, hedefUid, randevuId,
         tur: ders === OKUMA ? "okuma" : "ders",
+        haricUidler: [...engellediklerim],
         kayitKabul,
         durum: "bekliyor",
         teklif: { type: teklif.type, sdp: teklif.sdp },

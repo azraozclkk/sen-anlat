@@ -51,6 +51,7 @@ Uygulamada iki tür kullanıcı var:
 - **🔊 Yapay zekâya PDF okutma:** Kimseyi beklemeden PDF'ini yapay zekâya sesli okutabiliyor. Hangi sayfalar arasının okunacağını ve okuma hızını kendisi seçiyor. Metin matematik formülleriyle doluysa, uygulama "bunu bir gönüllünün anlatması daha iyi olur" diyerek onu gönüllüye yönlendiriyor.
 - **🕘 Geçmiş dersler:** Daha önce aldığı dersleri görebiliyor. Gönüllü izin verdiyse dersin ses kaydını tekrar dinleyebiliyor.
 - **⭐ Puanlama:** Her dersten sonra gönüllüyü puanlıyor. En yüksek puanlı gönüllüler listede en üstte çıkıyor.
+- **🚫 Engelleme ve şikayet:** Kötü bir deneyim yaşarsa karşısındaki kişiyi sebebini seçerek engelleyip şikayet edebiliyor. Engellenen kişi bir daha karşısına çıkmıyor, aradaki randevular iptal ediliyor.
 
 ### Gönüllü için
 
@@ -59,6 +60,7 @@ Uygulamada iki tür kullanıcı var:
 - İsterse metin okuma gönüllüsü de oluyor.
 - "Şu an müsaitim" düğmesini açarak randevusuz gelen aramaları da alabiliyor.
 - Derslerinin kaydedilip kaydedilmeyeceğine kendisi karar veriyor. Öğrenci bunu görerek o gönüllüyü seçip seçmeyeceğine karar veriyor.
+- Kendisi de geçmiş derslerinden bir öğrenciyi engelleyip şikayet edebiliyor.
 
 ---
 
@@ -80,6 +82,7 @@ Uygulama baştan görme engelli kullanıcılar düşünülerek tasarlandı:
 - **Ses kayıtları telefonda kalıyor:** Kayıtlar hiçbir sunucuya yüklenmiyor, sadece görüşen kişilerin kendi telefonunda saklanıyor ve 90 gün sonra otomatik siliniyor. Kayıt yapılırken ekranda her zaman gösteriliyor.
 - **Belgeler sunucuya gitmiyor:** Görüşmede gönderilen PDF ve fotoğraflar doğrudan karşı tarafın telefonuna gidiyor.
 - **Yapay zekâ telefonda çalışıyor:** PDF okuyan yapay zekâ metni hiçbir yere göndermiyor, her şey kullanıcının cihazında oluyor.
+- **5 engel = yasak:** Bir kişi 5 farklı kullanıcı tarafından engellenirse e-posta adresi uygulamadan kalıcı olarak yasaklanıyor; o e-postayla bir daha giriş yapılamıyor ve kayıt olunamıyor. Bu kural veritabanı güvenlik kurallarıyla da korunuyor, yani uygulama dışından atlatılamıyor.
 - **KVKK:** Kayıt sırasında aydınlatma metni, açık rıza metni ve kullanım koşulları gösteriliyor ve onaylatılıyor.
 
 ---
@@ -92,7 +95,6 @@ Uygulama hem kullanıcılar için hem de bizim için ücretsiz çalışıyor. Fi
 
 ## 🚀 İleride eklemek istediklerimiz
 
-- **Şikayet etme ve engelleme:** Öğrenci, kötü davranan bir gönüllüyü şikayet edebilecek ve onunla bir daha eşleşmeyecek.
 - **Hesabı silme:** Kullanıcı hesabını ve tüm bilgilerini tek dokunuşla silebilecek (KVKK'nın tanıdığı bir hak).
 - **Görüntülü görüşme:** Öğrenci telefonunun kamerasını açıp gönüllüye tahtayı ya da elindeki kağıdı gösterebilecek.
 - **Bekleme sırası:** Hemen yardım istendiğinde müsait gönüllü yoksa, öğrenci sıraya girecek ve ilk boşalan gönüllü onu arayacak.
