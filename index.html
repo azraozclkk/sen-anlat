@@ -1785,6 +1785,8 @@
   ] };
 
   async function mikrofonAl() {
+    // iPhone: yapay zekâ okuması ses oturumunu "sadece çalma"ya alıyordu; mikrofon için çalma+kayıt moduna geç
+    try { if (navigator.audioSession) navigator.audioSession.type = "play-and-record"; } catch {}
     yerelAkis = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
   }
 
@@ -2460,6 +2462,7 @@
     aiKaynaklar = [];
     sessizMod = false;
     if (aiYedek) { aiYedek = null; try { speechSynthesis.cancel(); } catch {} }
+    try { if (navigator.audioSession) navigator.audioSession.type = "auto"; } catch {} // mikrofon kullanımını engellemesin
     if (aiCtx && aiCtx.state !== "closed") aiCtx.close().catch(() => {});
     aiCtx = null;
     $("aiOynatici").classList.add("gizli");
