@@ -155,8 +155,8 @@ Uygulama hem kullanıcılar için hem de bizim için ücretsiz çalışıyor. Fi
 
 | Ad Soyad | Bölüm | Görev |
 |---|---|---|
-| Azra Özçelik | Veri Bilimi ve Analitiği, Sakarya Üniversitesi | [GÖREV] |
-| [AD SOYAD] | [BÖLÜM] | [GÖREV] |
+| Azra Özçelik | Veri Bilimi ve Analitiği, Sakarya Üniversitesi | Uygulama geliştirme |
+| Eylül Dayıoğlu | Veri Bilimi ve Analitiği, Sakarya Üniversitesi | Tasarım, sunum ve video |
 
 ---
 
