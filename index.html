@@ -202,7 +202,18 @@
   fieldset.hizSecimi label:has(input:checked) { background: var(--ana); border-color: var(--ana); color: #FFF; }
   fieldset.hizSecimi input { width: 22px; height: 22px; }
   html.yuksekKontrast fieldset.hizSecimi label:has(input:checked) { color: #000; }
-  .sayfaAraligi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .sayfaAraligi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0; }
+  label.sayiBlok { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 12px 14px; border: 2px solid var(--kenar); border-radius: 16px; background: var(--kart); font-size: 17px; }
+  label.sayiBlok input { margin: 0; border: none; padding: 4px 0; font-size: 26px; font-weight: 700; background: transparent; min-height: 0; }
+  label.dosyaBlok { position: relative; display: flex; align-items: center; justify-content: center; min-height: 96px; margin: 18px 0 12px; padding: 14px;
+    border: 3px dashed var(--ana); border-radius: 20px; background: var(--kart); color: var(--ana); font-size: 24px; font-weight: 800; text-align: center; cursor: pointer; }
+  label.dosyaBlok input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; margin: 0; }
+  label.dosyaBlok:focus-within { outline: 4px solid var(--odak, #C2410C); outline-offset: 3px; }
+  html.yuksekKontrast label.dosyaBlok { color: #FFE14D; border-color: #FFE14D; background: #000; }
+  html.yuksekKontrast label.sayiBlok { border-color: #FFE14D; background: #000; }
+  /* Sade ekranlar: başlık ve durum yazısı görünmez (ekran okuyucu yine okur) */
+  body.sadeEkran header .baslikGrup, body.sadeEkran #mesaj { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+  body.sadeEkran header { justify-content: flex-end; }
   .gizli { display: none !important; }
 </style>
 </head>
@@ -392,29 +403,29 @@
 
   <!-- YAPAY ZEKÂ İLE METİN OKUMA -->
   <section id="aiOkumaEkrani" class="gizli" aria-labelledby="aiOkumaBaslik">
-    <h2 id="aiOkumaBaslik">Yapay zekâ ile metin okuma</h2>
+    <h2 id="aiOkumaBaslik" class="gorunmez">Yapay zekâ ile metin okuma</h2>
+    <label class="dosyaBlok" for="aiPdf">
+      <input type="file" id="aiPdf" accept="application/pdf">
+      <span id="aiPdfYazi">PDF seç</span>
+    </label>
     <fieldset class="hizSecimi">
       <legend>Okuma hızı</legend>
       <label><input type="radio" name="aiHiz" value="0.95" checked> İdeal</label>
       <label><input type="radio" name="aiHiz" value="1.2"> Hızlı</label>
     </fieldset>
+    <div class="sayfaAraligi">
+      <label class="sayiBlok">Başlangıç sayfası
+        <input id="aiBaslangic" type="number" min="1" value="1" inputmode="numeric"></label>
+      <label class="sayiBlok">Bitiş sayfası
+        <input id="aiBitis" type="number" min="1" inputmode="numeric" placeholder="Son"></label>
+    </div>
+    <button id="aiBaslatBtn">Okumaya başla</button>
     <div id="aiOynatici" class="gizli">
-      <p id="aiIlerleme"></p>
+      <p id="aiIlerleme" class="gorunmez"></p>
       <button id="aiDuraklatBtn" class="ikincil">Duraklat</button>
       <button id="aiDurdurBtn" class="ikincil">Okumayı bitir</button>
       <a id="aiIndir" class="baglanti gizli" download="sen-anlat-okuma.wav">Sesi indir (WAV)</a>
     </div>
-    <p>PDF'ini yükle, yapay zekâ senin için sesli okusun. Okurken hızı değiştirebilirsin. Metin formül ve işlem içeriyorsa seni bir gönüllüye yönlendiririz.</p>
-    <label for="aiPdf">PDF dosyası</label>
-    <input type="file" id="aiPdf" accept="application/pdf">
-    <p id="aiSayfaBilgi" class="bos"></p>
-    <div class="sayfaAraligi">
-      <div><label for="aiBaslangic">Başlangıç sayfası</label>
-        <input id="aiBaslangic" type="number" min="1" value="1" inputmode="numeric"></div>
-      <div><label for="aiBitis">Bitiş sayfası</label>
-        <input id="aiBitis" type="number" min="1" inputmode="numeric" placeholder="Son sayfa"></div>
-    </div>
-    <button id="aiBaslatBtn">Okumaya başla</button>
 
     <div id="aiYonlendirme" class="uyari gizli">
       <p id="aiYonlendirmeMetin"></p>
@@ -725,6 +736,7 @@
   function goster(bolum) {
     aktifEkran = bolum;
     document.body.classList.toggle("anaEkranda", bolum === "anaEkran");
+    document.body.classList.toggle("sadeEkran", bolum === "aiOkumaEkrani");
     EKRANLAR.forEach(id => $(id).classList.toggle("gizli", id !== bolum));
     const baslik = $(bolum).querySelector("h2");
     baslik.setAttribute("tabindex", "-1");
@@ -2168,7 +2180,7 @@
   const scriptYukle = (src) => new Promise((tamam, hata) => {
     if ([...document.scripts].some(x => x.src.endsWith(src))) return tamam();
     const el_ = document.createElement("script");
-    el_.src = src; el_.onload = tamam; el_.onerror = () => hata(new Error(src + " yüklenemedi"));
+    el_.src = src; el_.onload = tamam; el_.onerror = () => { el_.remove(); hata(new Error(src + " yüklenemedi")); };
     document.head.append(el_);
   });
   async function aiMotorunuYukle() {
@@ -2237,6 +2249,7 @@
     aiYedek = { cumleler: parcalar, sira: Math.max(0, baslangic), jeton: 0, duraklatildi: false };
     $("aiOynatici").classList.remove("gizli");
     $("aiDuraklatBtn").textContent = "Duraklat";
+    $("aiDuraklatBtn").focus();
     sessizMod = true;
     aiYedekSonraki(no);
   }
@@ -2262,7 +2275,14 @@
     speechSynthesis.speak(u);
   }
 
+  // Model ekrana girer girmez arka planda yüklenmeye başlar; hazır değilse okuma telefonun sesiyle hemen başlar
+  function aiOnYukle() {
+    if (window.AiOkuma?.hazir()) return;
+    aiMotorunuYukle().catch((err) => console.warn("Yapay zekâ modeli arka planda yüklenemedi", err));
+  }
+
   $("aiOkumaBtn").onclick = () => {
+    aiOnYukle();
     $("aiYonlendirme").classList.add("gizli");
     goster("aiOkumaEkrani");
   };
@@ -2270,15 +2290,15 @@
   // PDF seçilince sayfa sayısını göster, bitiş sayfasını son sayfaya ayarla
   $("aiPdf").addEventListener("change", async () => {
     const dosya = $("aiPdf").files[0];
-    $("aiSayfaBilgi").textContent = "";
-    if (!dosya) return;
+    if (!dosya) { $("aiPdfYazi").textContent = "PDF seç"; return; }
+    $("aiPdfYazi").textContent = dosya.name;
     try {
       const n = (await pdfAc(dosya)).numPages;
       $("aiBaslangic").max = n; $("aiBitis").max = n;
       $("aiBaslangic").value = 1; $("aiBitis").value = n;
-      $("aiSayfaBilgi").textContent = `Bu PDF ${n} sayfa.`;
+      $("aiPdfYazi").textContent = `${dosya.name} · ${n} sayfa`;
       mesaj(`PDF seçildi, ${n} sayfa.`);
-    } catch { $("aiSayfaBilgi").textContent = "PDF açılamadı."; }
+    } catch { $("aiPdfYazi").textContent = "PDF açılamadı, başka bir dosya seç"; mesaj("PDF açılamadı.", true); }
   });
 
   // Okurken hız değişirse: o an okunan cümleden itibaren yeni hızla devam et
@@ -2339,12 +2359,9 @@
       $("aiOynatici").classList.remove("gizli");
       $("aiIndir").classList.add("gizli");
       $("aiDuraklatBtn").textContent = "Duraklat";
-      try {
-        if (!window.AiOkuma?.hazir()) { mesaj("Yapay zekâ modeli hazırlanıyor, ilk seferde biraz sürebilir."); await aiMotorunuYukle(); }
-      } catch (err) {
-        if (no !== aiOkumaNo) return;
-        console.warn("Yapay zekâ modeli yüklenemedi", err);
-        mesaj("Yapay zekâ sesi yüklenemedi, telefonun kendi Türkçe sesiyle okuyorum.", true);
+      if (!window.AiOkuma?.hazir()) {
+        // Bekletmemek için: model henüz inmediyse hemen telefonun sesiyle oku, model arka planda insin
+        aiOnYukle();
         aiYedekOku(baslangic);
         return;
       }
@@ -2356,7 +2373,7 @@
     aiKaynaklar = [];
     const ctx = aiCtx;
     const hiz = aiHiz();
-    let zaman = ctx.currentTime + (devam ? 0.1 : 1.2); // ilk başta duyuru bitsin diye kısa bekleme
+    let zaman = ctx.currentTime + (devam ? 0.1 : 0.4);
     if (!devam) {
       // Odak Duraklat butonunda: ekran okuyucuda iki kez dokunmak okumayı duraklatır
       $("aiDuraklatBtn").focus();
